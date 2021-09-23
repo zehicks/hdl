@@ -3,7 +3,7 @@
 ## Auto-generated, do not modify!
 ####################################################################################
 
-PROJECT_NAME := antsdr_ccbob_lvds
+PROJECT_NAME := antsdr_lvds
 
 M_DEPS += ../common/ccbob_constr.xdc
 M_DEPS += ../common/ccbob_bd.tcl
