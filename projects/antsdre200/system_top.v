@@ -53,10 +53,10 @@ module system_top (
   inout           ddr_ck_p,
   inout           ddr_cke,
   inout           ddr_cs_n,
-  inout   [ 1:0]  ddr_dm,
+  inout   [ 3:0]  ddr_dm,
   inout   [31:0]  ddr_dq,
-  inout   [ 1:0]  ddr_dqs_n,
-  inout   [ 1:0]  ddr_dqs_p,
+  inout   [ 3:0]  ddr_dqs_n,
+  inout   [ 3:0]  ddr_dqs_p,
   inout           ddr_odt,
   inout           ddr_ras_n,
   inout           ddr_reset_n,
@@ -64,7 +64,7 @@ module system_top (
 
   inout           fixed_io_ddr_vrn,
   inout           fixed_io_ddr_vrp,
-  inout   [31:0]  fixed_io_mio,
+  inout   [53:0]  fixed_io_mio,
   inout           fixed_io_ps_clk,
   inout           fixed_io_ps_porb,
   inout           fixed_io_ps_srstb,
@@ -72,17 +72,24 @@ module system_top (
   inout           iic_scl,
   inout           iic_sda,
 
-  input           rx_clk_in,
-  input           rx_frame_in,
-  input   [11:0]  rx_data_in,
-  output          tx_clk_out,
-  output          tx_frame_out,
-  output  [11:0]  tx_data_out,
+  input           rx_clk_in_p,
+  input           rx_clk_in_n,
+  input           rx_frame_in_p,
+  input           rx_frame_in_n,
+  input   [ 5:0]  rx_data_in_p,
+  input   [ 5:0]  rx_data_in_n,
+  output          tx_clk_out_p,
+  output          tx_clk_out_n,
+  output          tx_frame_out_p,
+  output          tx_frame_out_n,
+  output  [ 5:0]  tx_data_out_p,
+  output  [ 5:0]  tx_data_out_n,
 
   output          enable,
   output          txnrx,
 
   inout           gpio_resetb,
+  inout           gpio_sync,
   inout           gpio_en_agc,
   inout   [ 3:0]  gpio_ctl,
   inout   [ 7:0]  gpio_status,
@@ -96,25 +103,41 @@ module system_top (
   );
 
   // internal signals
-
-  wire    [24:0]  gpio_i;
-  wire    [24:0]  gpio_o;
-  wire    [24:0]  gpio_t;
+  wire    [95:0]  gp_out_s;
+  wire    [95:0]  gp_in_s;
+  wire    [63:0]  gpio_i;
+  wire    [63:0]  gpio_o;
+  wire    [63:0]  gpio_t;
+  wire    [85:0]  gp_out;
+  wire   [85:0]  gp_in;
+  // assignments
+  assign gp_out[85:0] = gp_out_s[85:0];
+  assign gp_in_s[95:86] = gp_out_s[95:86];
+  assign gp_in_s[85: 0] = gp_in[85:0];
 
   // instantiations
 
-  ad_iobuf #(.DATA_WIDTH(14)) i_iobuf (
-    .dio_t (gpio_t[13:0]),
-    .dio_i (gpio_o[13:0]),
-    .dio_o (gpio_i[13:0]),
-    .dio_p ({ gpio_resetb,        // 13:13
-              gpio_en_agc,        // 12:12
-              gpio_ctl,           // 11: 8
-              gpio_status}));     //  7: 0
+  // board gpio - 31-0
 
-  assign gpio_i[24:14] = gpio_o[24:14];
+  assign gpio_i[31:0] = gpio_o[31:0];
+
+  // ad9361 gpio - 63-32
+
+  assign gpio_i[63:47] = gpio_o[63:47];
   assign tx_amp_en = 1'b1;
   assign eth_rst_n = 1'b1;
+
+  ad_iobuf #(.DATA_WIDTH(15)) i_iobuf (
+    .dio_t ( gpio_t[46:32]),
+    .dio_i ( gpio_o[46:32]),
+    .dio_o ( gpio_i[46:32]),
+    .dio_p ({ gpio_resetb,        // 46:46
+              gpio_sync,          // 45:45
+              gpio_en_agc,        // 44:44
+              gpio_ctl,           // 43:40
+              gpio_status}));     // 39:32
+
+  // instantiations
 
   system_wrapper i_system_wrapper (
     .MDIO_PHY_mdc(MDIO_PHY_mdc),
@@ -125,7 +148,6 @@ module system_top (
     .RGMII_td(RGMII_td),
     .RGMII_tx_ctl(RGMII_tx_ctl),
     .RGMII_txc(RGMII_txc),
-    .eth_rst_n(),
     .ddr_addr (ddr_addr),
     .ddr_ba (ddr_ba),
     .ddr_cas_n (ddr_cas_n),
@@ -148,17 +170,27 @@ module system_top (
     .fixed_io_ps_clk (fixed_io_ps_clk),
     .fixed_io_ps_porb (fixed_io_ps_porb),
     .fixed_io_ps_srstb (fixed_io_ps_srstb),
+    .gp_in_0 (gp_in_s[31:0]),
+    .gp_in_1 (gp_in_s[63:32]),
+    .gp_in_2 (gp_in_s[95:64]),
+    .gp_in_3 (32'd0),
+    .gp_out_0 (gp_out_s[31:0]),
+    .gp_out_1 (gp_out_s[63:32]),
+    .gp_out_2 (gp_out_s[95:64]),
+    .gp_out_3 (),
     .gpio_i (gpio_i),
     .gpio_o (gpio_o),
     .gpio_t (gpio_t),
-    .rx_clk_in (rx_clk_in),
-    .rx_data_in (rx_data_in),
-    .rx_frame_in (rx_frame_in),
-    
-    // .ltc2630_mosi_0(ltc2630_mosi_0),
-    // .ltc2630_ncs_0(ltc2630_ncs_0),
-    // .ltc2630_sclk_0(ltc2630_sclk_0),
-
+    .gps_pps (1'b0),
+    .iic_main_scl_io (iic_scl),
+    .iic_main_sda_io (iic_sda),
+    .otg_vbusoc (1'b0),
+    .rx_clk_in_n (rx_clk_in_n),
+    .rx_clk_in_p (rx_clk_in_p),
+    .rx_data_in_n (rx_data_in_n),
+    .rx_data_in_p (rx_data_in_p),
+    .rx_frame_in_n (rx_frame_in_n),
+    .rx_frame_in_p (rx_frame_in_p),
     .spi0_clk_i (1'b0),
     .spi0_clk_o (spi_clk),
     .spi0_csn_0_o (spi_csn),
@@ -168,17 +200,29 @@ module system_top (
     .spi0_sdi_i (spi_miso),
     .spi0_sdo_i (1'b0),
     .spi0_sdo_o (spi_mosi),
-
-
-    .tx_clk_out (tx_clk_out),
-    .tx_data_out (tx_data_out),
-    .tx_frame_out (tx_frame_out),
+    .spi1_clk_i (1'b0),
+    .spi1_clk_o (),
+    .spi1_csn_0_o (),
+    .spi1_csn_1_o (),
+    .spi1_csn_2_o (),
+    .spi1_csn_i (1'b1),
+    .spi1_sdi_i (1'b0),
+    .spi1_sdo_i (1'b0),
+    .spi1_sdo_o (),
+    .tdd_sync_i (1'b0),
+    .tdd_sync_o (),
+    .tdd_sync_t (),
+    .tx_clk_out_n (tx_clk_out_n),
+    .tx_clk_out_p (tx_clk_out_p),
+    .tx_data_out_n (tx_data_out_n),
+    .tx_data_out_p (tx_data_out_p),
+    .tx_frame_out_n (tx_frame_out_n),
+    .tx_frame_out_p (tx_frame_out_p),
     .txnrx (txnrx),
-    .up_enable (gpio_o[15]),
-    .up_txnrx (gpio_o[16]));
+    .up_enable (gpio_o[47]),
+    .up_txnrx (gpio_o[48]));
 
 endmodule
 
 // ***************************************************************************
 // ***************************************************************************
-
