@@ -1,3 +1,12 @@
+set_property -dict {PACKAGE_PIN V6 IOSTANDARD LVCMOS18} [get_ports CLK_40M_DAC_nSYNC]   ;
+set_property -dict {PACKAGE_PIN W6 IOSTANDARD LVCMOS18} [get_ports CLK_40M_DAC_SCLK]    ;
+set_property -dict {PACKAGE_PIN V10 IOSTANDARD LVCMOS18} [get_ports CLK_40M_DAC_DIN]    ;
+set_property -dict {PACKAGE_PIN V11 IOSTANDARD LVCMOS18} [get_ports PPS_IN]             ;
+set_property -dict {PACKAGE_PIN K17 IOSTANDARD LVCMOS18} [get_ports CLK_40MHz_FPGA]     ;
+set_property -dict {PACKAGE_PIN J18 IOSTANDARD LVCMOS18} [get_ports CLKIN_10MHz]        ;
+set_property -dict {PACKAGE_PIN M20 IOSTANDARD LVCMOS18} [get_ports CLKIN_10MHz_REQ]    ;
+
+
 set_property  -dict {PACKAGE_PIN  C20   IOSTANDARD  LVCMOS18} [get_ports  RGMII_td[3]]  ;
 set_property  -dict {PACKAGE_PIN  D19   IOSTANDARD  LVCMOS18} [get_ports  RGMII_td[2]]  ;
 set_property  -dict {PACKAGE_PIN  D20   IOSTANDARD  LVCMOS18} [get_ports  RGMII_td[1]]  ;
@@ -7,11 +16,11 @@ set_property  -dict {PACKAGE_PIN  E19   IOSTANDARD  LVCMOS18} [get_ports  RGMII_
 set_property  -dict {PACKAGE_PIN  E17   IOSTANDARD  LVCMOS18} [get_ports  RGMII_rd[1]]  ;
 set_property  -dict {PACKAGE_PIN  F16   IOSTANDARD  LVCMOS18} [get_ports  RGMII_rd[0]]  ;
 
-set_property  -dict {PACKAGE_PIN  F20   IOSTANDARD  LVCMOS18} [get_ports  RGMII_tx_ctl]  ;
-set_property  -dict {PACKAGE_PIN  D18   IOSTANDARD  LVCMOS18} [get_ports  RGMII_txc]     ;
-set_property  -dict {PACKAGE_PIN  G17   IOSTANDARD  LVCMOS18} [get_ports  RGMII_rx_ctl]  ;
-set_property  -dict {PACKAGE_PIN  H16   IOSTANDARD  LVCMOS18} [get_ports  RGMII_rxc]     ;
-set_property  -dict {PACKAGE_PIN  B19   IOSTANDARD  LVCMOS18} [get_ports  eth_rst_n]   ;
+set_property  -dict {PACKAGE_PIN  F20   IOSTANDARD  LVCMOS18} [get_ports  RGMII_tx_ctl] ;
+set_property  -dict {PACKAGE_PIN  D18   IOSTANDARD  LVCMOS18} [get_ports  RGMII_txc]    ;
+set_property  -dict {PACKAGE_PIN  G17   IOSTANDARD  LVCMOS18} [get_ports  RGMII_rx_ctl] ;
+set_property  -dict {PACKAGE_PIN  H16   IOSTANDARD  LVCMOS18} [get_ports  RGMII_rxc]    ;
+set_property  -dict {PACKAGE_PIN  B19   IOSTANDARD  LVCMOS18} [get_ports  eth_rst_n]    ;
 set_property  -dict {PACKAGE_PIN  A20   IOSTANDARD  LVCMOS18} [get_ports  MDIO_PHY_mdio_io]   ;
 set_property  -dict {PACKAGE_PIN  B20   IOSTANDARD  LVCMOS18} [get_ports  MDIO_PHY_mdc]       ;
 

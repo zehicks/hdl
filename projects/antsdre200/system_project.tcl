@@ -8,7 +8,10 @@ adi_project antsdre200
 
 adi_project_files antsdre200 [list \
   "system_top.v" \
+  "b205_ref_pll.v" \
+  "ltc2630_spi.v" \
   "system_constr.xdc" \
+  "./ip/gen_clks/gen_clks.xci" \
   "$ad_hdl_dir/library/common/ad_iobuf.v"]
 
 set_property is_enabled false [get_files  *system_sys_ps7_0.xdc]

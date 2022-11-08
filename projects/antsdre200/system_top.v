@@ -92,6 +92,19 @@ module system_top (
   output          spi_mosi,
   input           spi_miso,
 
+
+  // clock form vctcxo
+  input  wire	 			      CLK_40MHz_FPGA  ,
+  // PPS or 10 MHz (need to choose from SW)
+  input  wire             PPS_IN          ,
+  input  wire             CLKIN_10MHz     ,
+  output wire             CLKIN_10MHz_REQ ,
+
+  // Clock disciplining / AD5662 controls
+  output wire             CLK_40M_DAC_nSYNC,
+  output wire             CLK_40M_DAC_SCLK ,
+  output wire             CLK_40M_DAC_DIN ,
+
   output          tx_amp_en
   );
 
@@ -100,6 +113,13 @@ module system_top (
   wire    [24:0]  gpio_i;
   wire    [24:0]  gpio_o;
   wire    [24:0]  gpio_t;
+  wire            int_40mhz   ;
+  wire            ref_pll_clk ;
+  wire            locked      ;
+  wire            ref_sel;
+  wire            ext_ref;
+  wire            ext_ref_is_pps;
+  wire            ext_ref_locked;
 
   // instantiations
 
@@ -112,9 +132,45 @@ module system_top (
               gpio_ctl,           // 11: 8
               gpio_status}));     //  7: 0
 
-  assign gpio_i[24:14] = gpio_o[24:14];
+  assign gpio_i[24:17] = gpio_o[24:17];
+
+  assign gpio_i[14] = ext_ref_locked;
+  assign ext_ref_is_pps = gpio_o[15];
+  assign ref_sel = gpio_o[16];
+
   assign tx_amp_en = 1'b1;
   assign eth_rst_n = 1'b1;
+
+  gen_clks gen_clks(
+      .clk_out1(int_40mhz),       // output clk_out1
+      .clk_out2(),                // output clk_out2
+      .clk_out3(ref_pll_clk),     // output clk_out3
+      .locked(locked),            // output locked
+
+      .clk_in1(CLK_40MHz_FPGA)
+  );
+
+
+  // vio_0 u_vio (
+  //   .clk(ref_pll_clk),                // input wire clk
+  //   .probe_in0(ext_ref_locked),    // input wire [0 : 0] probe_in0
+  //   .probe_out0(ext_ref_is_pps),  // output wire [0 : 0] probe_out0
+  //   .probe_out1(ref_sel)  // output wire [0 : 0] probe_out1
+  // );
+
+  assign ext_ref = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
+  b205_ref_pll ref_pll(
+      .reset(~locked),
+      .clk(ref_pll_clk),
+      .refclk(int_40mhz),
+      .ref_x(ext_ref),
+      .locked(ext_ref_locked),
+      .sclk(CLK_40M_DAC_SCLK),
+      .mosi(CLK_40M_DAC_DIN),
+      .sync_n(CLK_40M_DAC_nSYNC)
+  );
+  assign CLKIN_10MHz_REQ = ref_sel;
+
 
   system_wrapper i_system_wrapper (
     .MDIO_PHY_mdc(MDIO_PHY_mdc),
@@ -154,10 +210,6 @@ module system_top (
     .rx_clk_in (rx_clk_in),
     .rx_data_in (rx_data_in),
     .rx_frame_in (rx_frame_in),
-    
-    // .ltc2630_mosi_0(ltc2630_mosi_0),
-    // .ltc2630_ncs_0(ltc2630_ncs_0),
-    // .ltc2630_sclk_0(ltc2630_sclk_0),
 
     .spi0_clk_i (1'b0),
     .spi0_clk_o (spi_clk),
