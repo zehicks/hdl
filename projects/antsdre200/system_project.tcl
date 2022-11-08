@@ -8,6 +8,9 @@ adi_project antsdre200
 adi_project_files antsdre200 [list \
   "$ad_hdl_dir/library/common/ad_iobuf.v" \
   "system.xdc" \
+  "b205_ref_pll.v" \
+  "ltc2630_spi.v" \
+  "./ip/gen_clks/gen_clks.xci" \
   "system_top.v" ]
 
 adi_project_run antsdre200

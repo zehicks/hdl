@@ -2,12 +2,13 @@ set_property  -dict {PACKAGE_PIN  L20   IOSTANDARD LVCMOS18 PULLTYPE PULLUP} [ge
 set_property  -dict {PACKAGE_PIN  L19   IOSTANDARD LVCMOS18 PULLTYPE PULLUP} [get_ports iic_sda]           ; 
 
 
-set_property  -dict {PACKAGE_PIN  M20   IOSTANDARD  LVCMOS18} [get_ports  dac_sync] ;
-set_property  -dict {PACKAGE_PIN  M19   IOSTANDARD  LVCMOS18} [get_ports  dac_sclk] ;
-set_property  -dict {PACKAGE_PIN  M17   IOSTANDARD  LVCMOS18} [get_ports  dac_din]  ;
-set_property  -dict {PACKAGE_PIN  J18   IOSTANDARD  LVCMOS18} [get_ports  gps_pps]  ;
-
-set_property  -dict {PACKAGE_PIN  N16   IOSTANDARD  LVCMOS18} [get_ports  gpio_clksel]  ;
+set_property -dict {PACKAGE_PIN V6 IOSTANDARD LVCMOS18} [get_ports CLK_40M_DAC_nSYNC]   ;
+set_property -dict {PACKAGE_PIN W6 IOSTANDARD LVCMOS18} [get_ports CLK_40M_DAC_SCLK]    ;
+set_property -dict {PACKAGE_PIN V10 IOSTANDARD LVCMOS18} [get_ports CLK_40M_DAC_DIN]    ;
+set_property -dict {PACKAGE_PIN V11 IOSTANDARD LVCMOS18} [get_ports PPS_IN]             ;
+set_property -dict {PACKAGE_PIN K17 IOSTANDARD LVCMOS18} [get_ports CLK_40MHz_FPGA]     ;
+set_property -dict {PACKAGE_PIN J18 IOSTANDARD LVCMOS18} [get_ports CLKIN_10MHz]        ;
+set_property -dict {PACKAGE_PIN M20 IOSTANDARD LVCMOS18} [get_ports CLKIN_10MHz_REQ]    ;
 
 
 
