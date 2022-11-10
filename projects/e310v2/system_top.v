@@ -53,10 +53,10 @@ module system_top (
   inout           ddr_ck_p,
   inout           ddr_cke,
   inout           ddr_cs_n,
-  inout   [ 1:0]  ddr_dm,
+  inout   [ 3:0]  ddr_dm,
   inout   [31:0]  ddr_dq,
-  inout   [ 1:0]  ddr_dqs_n,
-  inout   [ 1:0]  ddr_dqs_p,
+  inout   [ 3:0]  ddr_dqs_n,
+  inout   [ 3:0]  ddr_dqs_p,
   inout           ddr_odt,
   inout           ddr_ras_n,
   inout           ddr_reset_n,
@@ -64,7 +64,7 @@ module system_top (
 
   inout           fixed_io_ddr_vrn,
   inout           fixed_io_ddr_vrp,
-  inout   [31:0]  fixed_io_mio,
+  inout   [53:0]  fixed_io_mio,
   inout           fixed_io_ps_clk,
   inout           fixed_io_ps_porb,
   inout           fixed_io_ps_srstb,
@@ -78,6 +78,7 @@ module system_top (
 
   output          enable,
   output          txnrx,
+  input           clk_out,
 
   inout           gpio_resetb,
   inout           gpio_en_agc,
@@ -89,17 +90,17 @@ module system_top (
   output          spi_mosi,
   input           spi_miso,
 
-
-  // clock form vctcxo
+ // clock form vctcxo
   input  wire	 			      CLK_40MHz_FPGA  ,
-  // PPS or 10 MHz
+  // PPS or 10 MHz (need to choose from SW)
   input  wire             PPS_IN          ,
   input  wire             CLKIN_10MHz     ,
 
-  // Clock disciplining / AD5660 controls
+  // Clock disciplining / AD5662 controls
   output wire             CLK_40M_DAC_nSYNC,
   output wire             CLK_40M_DAC_SCLK ,
   output wire             CLK_40M_DAC_DIN ,
+
 
   output wire             FE_TXRX2_SEL2 ,
   output wire             FE_TXRX2_SEL1 ,
@@ -110,24 +111,16 @@ module system_top (
   output wire             FE_RX1_SEL2 ,
   output wire             FE_RX1_SEL1 ,
 
-
-  output wire             GPS_RSTN,
-  output wire             GPS_PWEN,
-  input  wire             GPS_PPS,
-  output wire             GPS_EXT1,
-  input  wire             GPS_EXT0,
-
-  output wire             tx_amp_en1,
-  output wire             tx_amp_en2,
-
-  inout wire  [28:0]      GPIOB
+  inout wire  [28:0]      GPIOB   ,
+  output          tx_amp_en1,
+  output          tx_amp_en2
   );
 
   // internal signals
 
-  wire    [24:0]  gpio_i;
-  wire    [24:0]  gpio_o;
-  wire    [24:0]  gpio_t;
+  wire    [63:0]  gpio_i;
+  wire    [63:0]  gpio_o;
+  wire    [63:0]  gpio_t;
   wire            int_40mhz   ;
   wire            ref_pll_clk ;
   wire            locked      ;
@@ -147,14 +140,32 @@ module system_top (
               gpio_ctl,           // 11: 8
               gpio_status}));     //  7: 0
 
-  assign gpio_i[24:17] = gpio_o[24:17];
+  assign gpio_i[31:14] = gpio_o[31:14];
 
-  assign gpio_i[14] = ext_ref_locked;
-  assign ext_ref_is_pps = gpio_o[15];
-  assign ref_sel = gpio_o[16];
+  ad_iobuf #(.DATA_WIDTH(29)) i_iobuf_gpio (
+    .dio_t (gpio_t[63:35]),
+    .dio_i (gpio_o[63:35]),
+    .dio_o (gpio_i[63:35]),
+    .dio_p (GPIOB )
+    ); 
 
-  assign tx_amp_en = 1'b1;
+
+  assign gpio_i[32] = ext_ref_locked;
+  assign ext_ref_is_pps = gpio_o[33];
+  assign ref_sel = gpio_o[34];
+
+  assign tx_amp_en1 = 1'b1;
+  assign tx_amp_en2 = 1'b1;
   assign eth_rst_n = 1'b1;
+
+  assign FE_TXRX2_SEL2 = 1'b0;
+  assign FE_TXRX2_SEL1 = 1'b1;
+  assign FE_TXRX1_SEL2 = 1'b1;
+  assign FE_TXRX1_SEL1 = 1'b0;
+  assign FE_RX2_SEL2 = 1'b0;
+  assign FE_RX2_SEL1 = 1'b1;
+  assign FE_RX1_SEL2 = 1'b1;
+  assign FE_RX1_SEL1 = 1'b0;
 
   gen_clks gen_clks(
       .clk_out1(int_40mhz),       // output clk_out1
@@ -176,25 +187,6 @@ module system_top (
       .mosi(CLK_40M_DAC_DIN),
       .sync_n(CLK_40M_DAC_nSYNC)
   );
-  assign CLKIN_10MHz_REQ = ref_sel;
-
-  vio_0 u_vio (
-    .clk(int_40mhz),                  // input wire clk
-    .probe_in0(ext_ref_locked),      // input wire [0 : 0] probe_in0
-    .probe_out0(),    // output wire [0 : 0] probe_out0
-    .probe_out1(),    // output wire [0 : 0] probe_out1
-    .probe_out2(FE_TXRX2_SEL2),    // output wire [0 : 0] probe_out2
-    .probe_out3(FE_TXRX2_SEL1),    // output wire [0 : 0] probe_out3
-    .probe_out4(FE_TXRX1_SEL2),    // output wire [0 : 0] probe_out4
-    .probe_out5(FE_TXRX1_SEL1),    // output wire [0 : 0] probe_out5
-    .probe_out6(FE_RX2_SEL2),    // output wire [0 : 0] probe_out6
-    .probe_out7(FE_RX2_SEL1),    // output wire [0 : 0] probe_out7
-    .probe_out8(FE_RX1_SEL2),    // output wire [0 : 0] probe_out8
-    .probe_out9(FE_RX1_SEL1),    // output wire [0 : 0] probe_out9
-    .probe_out10(tx_amp_en1),  // output wire [0 : 0] probe_out10
-    .probe_out11(tx_amp_en2)  // output wire [0 : 0] probe_out11
-  );
-
 
   system_wrapper i_system_wrapper (
     .MDIO_PHY_mdc(MDIO_PHY_mdc),
@@ -205,7 +197,6 @@ module system_top (
     .RGMII_td(RGMII_td),
     .RGMII_tx_ctl(RGMII_tx_ctl),
     .RGMII_txc(RGMII_txc),
-    .eth_rst_n(),
     .ddr_addr (ddr_addr),
     .ddr_ba (ddr_ba),
     .ddr_cas_n (ddr_cas_n),
@@ -257,4 +248,3 @@ endmodule
 
 // ***************************************************************************
 // ***************************************************************************
-
