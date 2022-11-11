@@ -105,14 +105,16 @@ module system_top (
   output wire             CLK_40M_DAC_SCLK ,
   output wire             CLK_40M_DAC_DIN ,
 
-  output          tx_amp_en
+  output                  tx_amp_en,
+
+  inout   [7:0]           GPIOB
   );
 
   // internal signals
 
-  wire    [24:0]  gpio_i;
-  wire    [24:0]  gpio_o;
-  wire    [24:0]  gpio_t;
+  wire    [63:0]  gpio_i;
+  wire    [63:0]  gpio_o;
+  wire    [63:0]  gpio_t;
   wire            int_40mhz   ;
   wire            ref_pll_clk ;
   wire            locked      ;
@@ -132,11 +134,19 @@ module system_top (
               gpio_ctl,           // 11: 8
               gpio_status}));     //  7: 0
 
-  assign gpio_i[24:17] = gpio_o[24:17];
+  ad_iobuf #(.DATA_WIDTH(8)) gpio_io_buf (
+    .dio_t (gpio_t[42:35]),
+    .dio_i (gpio_o[42:35]),
+    .dio_o (gpio_i[42:35]),
+    .dio_p (GPIOB       )
+    );
 
-  assign gpio_i[14] = ext_ref_locked;
-  assign ext_ref_is_pps = gpio_o[15];
-  assign ref_sel = gpio_o[16];
+  assign gpio_i[31:17] = gpio_o[31:17];
+
+  assign gpio_i[32] = ext_ref_locked;
+  assign ext_ref_is_pps = gpio_o[33];
+  assign ref_sel = gpio_o[34];
+
 
   assign tx_amp_en = 1'b1;
   assign eth_rst_n = 1'b1;
