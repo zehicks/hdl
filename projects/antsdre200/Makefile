@@ -3,7 +3,7 @@
 ## Auto-generated, do not modify!
 ####################################################################################
 
-PROJECT_NAME := antsdr_e200
+PROJECT_NAME := antsdre200
 
 M_DEPS += system.xdc
 M_DEPS += ../../library/common/ad_iobuf.v

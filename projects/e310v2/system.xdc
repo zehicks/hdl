@@ -169,20 +169,3 @@ set_property  -dict {PACKAGE_PIN G19 IOSTANDARD LVCMOS18} [get_ports GPIOB[3] ] 
 set_property  -dict {PACKAGE_PIN H20 IOSTANDARD LVCMOS18} [get_ports GPIOB[2] ]  ;
 set_property  -dict {PACKAGE_PIN J20 IOSTANDARD LVCMOS18} [get_ports GPIOB[1] ]  ;
 set_property  -dict {PACKAGE_PIN G18 IOSTANDARD LVCMOS18} [get_ports GPIOB[0] ]  ;
-
-
-
-#  SD 0 / data[1] / MIO[43]
-set_property iostandard "LVCMOS33" [get_ports "MIO[43]"]
-set_property PACKAGE_PIN "E12" [get_ports "MIO[43]"]
-set_property slew "slow" [get_ports "MIO[43]"]
-set_property drive "8" [get_ports "MIO[43]"]
-set_property pullup "TRUE" [get_ports "MIO[43]"]
-set_property PIO_DIRECTION "BIDIR" [get_ports "MIO[43]"]
-#  SD 0 / data[0] / MIO[42]
-set_property iostandard "LVCMOS33" [get_ports "MIO[42]"]
-set_property PACKAGE_PIN "A9" [get_ports "MIO[42]"]
-set_property slew "slow" [get_ports "MIO[42]"]
-set_property drive "8" [get_ports "MIO[42]"]
-set_property pullup "TRUE" [get_ports "MIO[42]"]
-set_property PIO_DIRECTION "BIDIR" [get_ports "MIO[42]"]

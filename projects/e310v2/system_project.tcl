@@ -11,7 +11,6 @@ adi_project_files e310v2 [list \
   "b205_ref_pll.v" \
   "ad5662_auto_spi.v" \
   "./ip/gen_clks/gen_clks.xci" \
-  "./ip/vio_0/vio_0.xci" \
   "system_top.v" ]
 
 adi_project_run e310v2

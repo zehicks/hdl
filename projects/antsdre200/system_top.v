@@ -139,54 +139,61 @@ module system_top (
   // instantiations
 
   // board gpio - 31-0
-
-  assign gpio_i[31:17] = gpio_o[31:17];
-  assign gpio_i[13:0] = gpio_o[13:0];
-
-  // ad9361 gpio - 63-32
-
-  assign gpio_i[63:47] = gpio_o[63:47];
-  assign tx_amp_en = 1'b1;
-  assign eth_rst_n = 1'b1;
-
+  assign gpio_i[31:15] = gpio_o[31:15];
   ad_iobuf #(.DATA_WIDTH(15)) i_iobuf (
-    .dio_t ( gpio_t[46:32]),
-    .dio_i ( gpio_o[46:32]),
-    .dio_o ( gpio_i[46:32]),
-    .dio_p ({ gpio_resetb,        // 46:46
-              gpio_sync,          // 45:45
-              gpio_en_agc,        // 44:44
-              gpio_ctl,           // 43:40
-              gpio_status}));     // 39:32
+    .dio_t (gpio_t[14:0]),
+    .dio_i (gpio_o[14:0]),
+    .dio_o (gpio_i[14:0]),
+    .dio_p ({ gpio_resetb,        // 14:14
+              gpio_sync,          // 13:13
+              gpio_en_agc,        // 12:12
+              gpio_ctl,           // 11: 8
+              gpio_status}));     //  7: 0
 
-  assign gpio_i[14] = ext_ref_locked;
-  assign ext_ref_is_pps = gpio_o[15];
-  assign ref_sel = gpio_o[16];
+  ad_iobuf #(.DATA_WIDTH(29)) i_iobuf_gpio (
+    .dio_t (gpio_t[63:35]),
+    .dio_i (gpio_o[63:35]),
+    .dio_o (gpio_i[63:35]),
+    .dio_p (GPIOB )
+    ); 
+            
 
-  assign tx_amp_en = 1'b1;
-  assign eth_rst_n = 1'b1;
-
-  gen_clks gen_clks(
-      .clk_out1(int_40mhz),       // output clk_out1
-      .clk_out2(),                // output clk_out2
-      .clk_out3(ref_pll_clk),     // output clk_out3
-      .locked(locked),            // output locked
-
-      .clk_in1(CLK_40MHz_FPGA)
-  );
-
-  assign ext_ref = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
-  b205_ref_pll ref_pll(
-      .reset(~locked),
-      .clk(ref_pll_clk),
-      .refclk(int_40mhz),
-      .ref_x(ext_ref),
-      .locked(ext_ref_locked),
-      .sclk(CLK_40M_DAC_SCLK),
-      .mosi(CLK_40M_DAC_DIN),
-      .sync_n(CLK_40M_DAC_nSYNC)
-  );
-  assign CLKIN_10MHz_REQ = ref_sel;
+    assign gpio_i[32] = ext_ref_locked;
+    assign ext_ref_is_pps = gpio_o[33];
+    assign ref_sel = gpio_o[34];
+    assign tx_amp_en = 1'b1;
+    assign eth_rst_n = 1'b1;
+  
+    assign FE_TXRX2_SEL2 = 1'b0;
+    assign FE_TXRX2_SEL1 = 1'b1;
+    assign FE_TXRX1_SEL2 = 1'b1;
+    assign FE_TXRX1_SEL1 = 1'b0;
+    assign FE_RX2_SEL2 = 1'b0;
+    assign FE_RX2_SEL1 = 1'b1;
+    assign FE_RX1_SEL2 = 1'b1;
+    assign FE_RX1_SEL1 = 1'b0;
+  
+    gen_clks gen_clks(
+        .clk_out1(int_40mhz),       // output clk_out1
+        .clk_out2(),                // output clk_out2
+        .clk_out3(ref_pll_clk),     // output clk_out3
+        .locked(locked),            // output locked
+  
+        .clk_in1(CLK_40MHz_FPGA)
+    );
+  
+    assign ext_ref = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
+    b205_ref_pll ref_pll(
+        .reset(~locked),
+        .clk(ref_pll_clk),
+        .refclk(int_40mhz),
+        .ref_x(ext_ref),
+        .locked(ext_ref_locked),
+        .sclk(CLK_40M_DAC_SCLK),
+        .mosi(CLK_40M_DAC_DIN),
+        .sync_n(CLK_40M_DAC_nSYNC)
+    );
+    assign CLKIN_10MHz_REQ = ref_sel;
 
   // instantiations
 

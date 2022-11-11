@@ -153,73 +153,66 @@ module system_top (
   // instantiations
 
   // board gpio - 31-0
+  assign gpio_i[31:15] = gpio_o[31:15];
 
-  assign gpio_i[31:17] = gpio_o[31:17];
-  assign gpio_i[13:0] = gpio_o[13:0];
-
-  // ad9361 gpio - 63-32
-
-  assign gpio_i[63:47] = gpio_o[63:47];
   assign tx_amp_en = 1'b1;
   assign eth_rst_n = 1'b1;
 
   ad_iobuf #(.DATA_WIDTH(15)) i_iobuf (
-    .dio_t ( gpio_t[46:32]),
-    .dio_i ( gpio_o[46:32]),
-    .dio_o ( gpio_i[46:32]),
-    .dio_p ({ gpio_resetb,        // 46:46
-              gpio_sync,          // 45:45
-              gpio_en_agc,        // 44:44
-              gpio_ctl,           // 43:40
-              gpio_status}));     // 39:32
+    .dio_t (gpio_t[14:0]),
+    .dio_i (gpio_o[14:0]),
+    .dio_o (gpio_i[14:0]),
+    .dio_p ({ gpio_resetb,        // 14:14
+              gpio_sync,          // 13:13
+              gpio_en_agc,        // 12:12
+              gpio_ctl,           // 11: 8
+              gpio_status}));     //  7: 0
 
-  // assign gpio_i[14] = ext_ref_locked;
-  // assign ext_ref_is_pps = gpio_o[15];
-  // assign ref_sel = gpio_o[16];
-  // assign tx_amp_en1 = 1'b1;
-  // assign tx_amp_en2 = 1'b1;
+  ad_iobuf #(.DATA_WIDTH(29)) i_iobuf_gpio (
+    .dio_t (gpio_t[63:35]),
+    .dio_i (gpio_o[63:35]),
+    .dio_o (gpio_i[63:35]),
+    .dio_p (GPIOB )
+    ); 
+            
 
-  assign eth_rst_n = 1'b1;
-
-  gen_clks gen_clks(
-      .clk_out1(int_40mhz),       // output clk_out1
-      .clk_out2(),                // output clk_out2
-      .clk_out3(ref_pll_clk),     // output clk_out3
-      .locked(locked),            // output locked
-
-      .clk_in1(CLK_40MHz_FPGA)
-  );
-
-  assign ext_ref = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
-  b205_ref_pll ref_pll(
-      .reset(~locked),
-      .clk(ref_pll_clk),
-      .refclk(int_40mhz),
-      .ref_x(ext_ref),
-      .locked(ext_ref_locked),
-      .sclk(CLK_40M_DAC_SCLK),
-      .mosi(CLK_40M_DAC_DIN),
-      .sync_n(CLK_40M_DAC_nSYNC)
-  );
-
-
-  vio_0 u_vio (
-    .clk(int_40mhz),                  // input wire clk
-    .probe_in0(ext_ref_locked),      // input wire [0 : 0] probe_in0
-    .probe_out0(ext_ref_is_pps),    // output wire [0 : 0] probe_out0
-    .probe_out1(ref_sel),    // output wire [0 : 0] probe_out1
-    .probe_out2(FE_TXRX2_SEL2),    // output wire [0 : 0] probe_out2
-    .probe_out3(FE_TXRX2_SEL1),    // output wire [0 : 0] probe_out3
-    .probe_out4(FE_TXRX1_SEL2),    // output wire [0 : 0] probe_out4
-    .probe_out5(FE_TXRX1_SEL1),    // output wire [0 : 0] probe_out5
-    .probe_out6(FE_RX2_SEL2),    // output wire [0 : 0] probe_out6
-    .probe_out7(FE_RX2_SEL1),    // output wire [0 : 0] probe_out7
-    .probe_out8(FE_RX1_SEL2),    // output wire [0 : 0] probe_out8
-    .probe_out9(FE_RX1_SEL1),    // output wire [0 : 0] probe_out9
-    .probe_out10(tx_amp_en1),  // output wire [0 : 0] probe_out10
-    .probe_out11(tx_amp_en2)  // output wire [0 : 0] probe_out11
-  );
-  // instantiations
+    assign gpio_i[32] = ext_ref_locked;
+    assign ext_ref_is_pps = gpio_o[33];
+    assign ref_sel = gpio_o[34];
+  
+    assign tx_amp_en1 = 1'b1;
+    assign tx_amp_en2 = 1'b1;
+    assign eth_rst_n = 1'b1;
+  
+    assign FE_TXRX2_SEL2 = 1'b0;
+    assign FE_TXRX2_SEL1 = 1'b1;
+    assign FE_TXRX1_SEL2 = 1'b1;
+    assign FE_TXRX1_SEL1 = 1'b0;
+    assign FE_RX2_SEL2 = 1'b0;
+    assign FE_RX2_SEL1 = 1'b1;
+    assign FE_RX1_SEL2 = 1'b1;
+    assign FE_RX1_SEL1 = 1'b0;
+  
+    gen_clks gen_clks(
+        .clk_out1(int_40mhz),       // output clk_out1
+        .clk_out2(),                // output clk_out2
+        .clk_out3(ref_pll_clk),     // output clk_out3
+        .locked(locked),            // output locked
+  
+        .clk_in1(CLK_40MHz_FPGA)
+    );
+  
+    assign ext_ref = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
+    b205_ref_pll ref_pll(
+        .reset(~locked),
+        .clk(ref_pll_clk),
+        .refclk(int_40mhz),
+        .ref_x(ext_ref),
+        .locked(ext_ref_locked),
+        .sclk(CLK_40M_DAC_SCLK),
+        .mosi(CLK_40M_DAC_DIN),
+        .sync_n(CLK_40M_DAC_nSYNC)
+    );
 
   system_wrapper i_system_wrapper (
     .MDIO_PHY_mdc(MDIO_PHY_mdc),
@@ -299,8 +292,8 @@ module system_top (
     .tx_frame_out_n (tx_frame_out_n),
     .tx_frame_out_p (tx_frame_out_p),
     .txnrx (txnrx),
-    .up_enable (gpio_o[47]),
-    .up_txnrx (gpio_o[48]));
+    .up_enable (gpio_o[15]),
+    .up_txnrx (gpio_o[16]));
 
 endmodule
 
