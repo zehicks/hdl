@@ -10,7 +10,7 @@ adi_project_files e310v2 [list \
   "system_top.v" \
   "system_constr.xdc" \
   "b205_ref_pll.v" \
-  "ltc2630_spi.v" \
+  "ad5662_auto_spi.v" \
   "./ip/gen_clks/gen_clks.xci" \
   "$ad_hdl_dir/library/common/ad_iobuf.v"]
 
