@@ -95,6 +95,13 @@ module system_top (
   // PPS or 10 MHz (need to choose from SW)
   input  wire             PPS_IN          ,
   input  wire             CLKIN_10MHz     ,
+  input  wire             PPS_GPS         ,
+
+  // GPS
+  output wire             GPS_RSTN        ,
+  output wire             GPS_PWEN        ,
+  output wire             GPS_EXT1        ,
+  output wire             GPS_EXT0        ,
 
   // Clock disciplining / AD5662 controls
   output wire             CLK_40M_DAC_nSYNC,
@@ -125,34 +132,13 @@ module system_top (
   wire            ref_pll_clk ;
   wire            locked      ;
   wire            ref_sel;
-  wire            ext_ref;
+  wire            ppsgps;
+  wire            ppsext;
+  wire    [1:0]   pps_sel;
+  wire            lpps;
+  wire            ref_locked        ;
+  wire            pll_locked        ;
   wire            ext_ref_is_pps;
-  wire            ext_ref_locked;
-
-  // instantiations
-
-  ad_iobuf #(.DATA_WIDTH(14)) i_iobuf (
-    .dio_t (gpio_t[13:0]),
-    .dio_i (gpio_o[13:0]),
-    .dio_o (gpio_i[13:0]),
-    .dio_p ({ gpio_resetb,        // 13:13
-              gpio_en_agc,        // 12:12
-              gpio_ctl,           // 11: 8
-              gpio_status}));     //  7: 0
-
-  assign gpio_i[31:14] = gpio_o[31:14];
-
-  ad_iobuf #(.DATA_WIDTH(29)) i_iobuf_gpio (
-    .dio_t (gpio_t[63:35]),
-    .dio_i (gpio_o[63:35]),
-    .dio_o (gpio_i[63:35]),
-    .dio_p (GPIOB )
-    ); 
-
-
-  assign gpio_i[32] = ext_ref_locked;
-  assign ext_ref_is_pps = gpio_o[33];
-  assign ref_sel = gpio_o[34];
 
   assign tx_amp_en1 = 1'b1;
   assign tx_amp_en2 = 1'b1;
@@ -167,26 +153,56 @@ module system_top (
   assign FE_RX1_SEL2 = 1'b1;
   assign FE_RX1_SEL1 = 1'b0;
 
-  gen_clks gen_clks(
-      .clk_out1(int_40mhz),       // output clk_out1
-      .clk_out2(),                // output clk_out2
-      .clk_out3(ref_pll_clk),     // output clk_out3
-      .locked(locked),            // output locked
+  assign GPS_RSTN = pll_locked;
+  assign GPS_PWEN = pll_locked;
 
-      .clk_in1(CLK_40MHz_FPGA)
+  // instantiations
+
+  ad_iobuf #(.DATA_WIDTH(14)) i_iobuf (
+    .dio_t (gpio_t[13:0]),
+    .dio_i (gpio_o[13:0]),
+    .dio_o (gpio_i[13:0]),
+    .dio_p ({ gpio_resetb,        // 13:13
+              gpio_en_agc,        // 12:12
+              gpio_ctl,           // 11: 8
+              gpio_status}));     //  7: 0
+
+  assign gpio_i[29:14] = gpio_o[29:14];
+
+  ad_iobuf #(.DATA_WIDTH(29)) i_iobuf_gpio (
+    .dio_t (gpio_t[63:35]),
+    .dio_i (gpio_o[63:35]),
+    .dio_o (gpio_i[63:35]),
+    .dio_p (GPIOB )
+    ); 
+
+  assign pps_sel = gpio_i[31:30];
+  assign gpio_i[32] = ref_locked;
+  assign ext_ref_is_pps = gpio_o[33];
+  assign ref_sel = gpio_o[34];
+
+  assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
+  assign ppsgps = PPS_GPS;
+
+  ppsloop u_ppsloop(
+      .xoclk   ( CLK_40MHz_FPGA   ),
+      .ppsgps  ( ppsgps  ),
+      .ppsext  ( ppsext  ),
+      .refsel  ( pps_sel ),
+      .lpps    ( lpps    ),
+      .is10meg (  ),
+      .ispps   (  ),
+      .reflck  ( ref_locked ),
+      .plllck  ( pll_locked ),
+      .bus_clk (  ),
+      .sclk    ( CLK_40M_DAC_SCLK    ),
+      .mosi    ( CLK_40M_DAC_DIN    ),
+      .sync_n  ( CLK_40M_DAC_nSYNC  ),
+      .dac_dflt  ( 16'h7fff )
   );
 
-  assign ext_ref = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
-  b205_ref_pll ref_pll(
-      .reset(~locked),
-      .clk(ref_pll_clk),
-      .refclk(int_40mhz),
-      .ref_x(ext_ref),
-      .locked(ext_ref_locked),
-      .sclk(CLK_40M_DAC_SCLK),
-      .mosi(CLK_40M_DAC_DIN),
-      .sync_n(CLK_40M_DAC_nSYNC)
-  );
+
+
 
   system_wrapper i_system_wrapper (
     .MDIO_PHY_mdc(MDIO_PHY_mdc),

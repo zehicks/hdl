@@ -8,6 +8,7 @@ set_property  -dict {PACKAGE_PIN  T9    IOSTANDARD LVCMOS33} [get_ports CLK_40M_
 set_property  -dict {PACKAGE_PIN  V5    IOSTANDARD LVCMOS33} [get_ports CLK_40M_DAC_SCLK]   ;
 set_property  -dict {PACKAGE_PIN  U10   IOSTANDARD LVCMOS33} [get_ports CLK_40M_DAC_DIN]    ;
 set_property  -dict {PACKAGE_PIN  Y7    IOSTANDARD LVCMOS33} [get_ports PPS_IN]             ;
+set_property  -dict {PACKAGE_PIN  U9	IOSTANDARD LVCMOS33} [get_ports PPS_GPS]         ; 
 set_property  -dict {PACKAGE_PIN  L16   IOSTANDARD LVCMOS18} [get_ports CLK_40MHz_FPGA]     ;
 set_property  -dict {PACKAGE_PIN  J18   IOSTANDARD LVCMOS18} [get_ports CLKIN_10MHz]       ;
 
@@ -34,7 +35,6 @@ set_property  -dict {PACKAGE_PIN  Y11   IOSTANDARD LVCMOS33} [get_ports tx_amp_e
 #################################################################################################################
 set_property  -dict {PACKAGE_PIN W8	   IOSTANDARD LVCMOS33}     [get_ports GPS_RSTN]        ; 
 set_property  -dict {PACKAGE_PIN W9	   IOSTANDARD LVCMOS33}     [get_ports GPS_PWEN]        ; 
-set_property  -dict {PACKAGE_PIN U9	   IOSTANDARD LVCMOS33}     [get_ports GPS_PPS]         ; 
 set_property  -dict {PACKAGE_PIN W10   IOSTANDARD LVCMOS33}     [get_ports GPS_EXT1]        ; 
 set_property  -dict {PACKAGE_PIN U8	   IOSTANDARD LVCMOS33}     [get_ports GPS_EXT0]        ; 
 
@@ -177,4 +177,4 @@ set_input_jitter clk_fpga_1 0.15
 
 set_false_path -from [get_pins {i_system_wrapper/system_i/axi_ad9361/inst/i_rx/i_up_adc_common/up_adc_gpio_out_int_reg[0]/C}]
 set_false_path -from [get_pins {i_system_wrapper/system_i/axi_ad9361/inst/i_tx/i_up_dac_common/up_dac_gpio_out_int_reg[0]/C}]
-
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets PPS_GPS_IBUF]

@@ -9,9 +9,8 @@ adi_project e310v2
 adi_project_files e310v2 [list \
   "system_top.v" \
   "system_constr.xdc" \
-  "b205_ref_pll.v" \
+  "ppsloop.v" \
   "ad5662_auto_spi.v" \
-  "./ip/gen_clks/gen_clks.xci" \
   "$ad_hdl_dir/library/common/ad_iobuf.v"]
 
 set_property is_enabled false [get_files  *system_sys_ps7_0.xdc]
