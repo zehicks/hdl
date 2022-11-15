@@ -176,12 +176,15 @@ module system_top (
     .dio_p (GPIOB )
     ); 
 
-  assign pps_sel = gpio_i[31:30];
+  assign pps_sel = gpio_o[31:30];
   assign gpio_i[32] = ref_locked;
   assign ext_ref_is_pps = gpio_o[33];
   assign ref_sel = gpio_o[34];
+  
+  assign gpio_i[31:30] = gpio_o[31:30];
+  assign gpio_i[34:33] = gpio_o[34:33];
 
-  assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
+  assign ppsext = ext_ref_is_pps ? PPS_IN : (ref_sel ? CLKIN_10MHz : 1'b0);
   assign ppsgps = PPS_GPS;
 
   ppsloop u_ppsloop(
