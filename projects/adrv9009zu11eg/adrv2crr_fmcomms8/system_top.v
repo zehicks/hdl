@@ -52,10 +52,14 @@ module system_top (
   inout               pmod0_d5,
   inout               pmod0_d6,
   inout               pmod0_d7,
-  output              gpio_0_exp_n, //CS
+  output              gpio_0_exp_n, //CS_HMC7044
   output              gpio_0_exp_p, //MOSI
   input               gpio_1_exp_n, //MISO
   output              gpio_1_exp_p, //SCK
+  output              gpio_2_exp_n, //CS_AD9545
+  inout               gpio_3_exp_n, //RESET_HMC7044
+  inout               gpio_3_exp_p, //RESET_AD9545
+  inout               gpio_4_exp_n, //VCXO_SELECT
   output              led_gpio_0,
   output              led_gpio_1,
   output              led_gpio_2,
@@ -354,6 +358,8 @@ module system_top (
       3'h2: spi_3_to_8_csn = 8'b11111011;
       3'h3: spi_3_to_8_csn = 8'b11110111;
       3'h4: spi_3_to_8_csn = 8'b11101111;
+      3'h5: spi_3_to_8_csn = 8'b11011111;
+      3'h6: spi_3_to_8_csn = 8'b10111111;
       default: spi_3_to_8_csn = 8'b11111111;
     endcase
   end
@@ -373,8 +379,9 @@ module system_top (
   assign spi_csn_hmc7044_car = spi_3_to_8_csn[3];
   assign gpio_0_exp_n = spi_3_to_8_csn[4];
   assign gpio_1_exp_p = spi_clk;
-  assign gpio_0_exp_p = spi_3_to_8_csn[4] == 1'b0 ?  spi_mosi : 1'bZ;
-  assign spi_miso_s = spi_3_to_8_csn[4] == 1'b0 ? gpio_1_exp_n : spi_miso;
+  assign gpio_0_exp_p = spi_mosi;
+  assign spi_miso_s = ((spi_3_to_8_csn[4] == 1'b0) | (spi_3_to_8_csn[5] == 1'b0))? gpio_1_exp_n : spi_miso;
+  assign gpio_2_exp_n = spi_3_to_8_csn[5];
 
   assign spi_csn_adrv9009_c = spi_fmcomms8_3_to_8_csn[0];
   assign spi_csn_adrv9009_d = spi_fmcomms8_3_to_8_csn[1];
@@ -398,7 +405,7 @@ module system_top (
 
   assign tx_sync = tx_sync_a & tx_sync_b & tx_sync_c & tx_sync_d;
 
-  assign gpio_i[94:90] = gpio_o[94:90];
+  assign gpio_i[94:93] = gpio_o[94:93];
   assign gpio_i[31:28] = gpio_o[31:28];
   assign gpio_i[21:20] = gpio_o[21:20];
 
@@ -446,11 +453,14 @@ module system_top (
               adrv9009_gpio_01_c,       // 01
               adrv9009_gpio_00_c}));    // 00
 
-  ad_iobuf #(.DATA_WIDTH(58)) i_iobuf (
-    .dio_t ({gpio_t[89:32]}),
-    .dio_i ({gpio_o[89:32]}),
-    .dio_o ({gpio_i[89:32]}),
+  ad_iobuf #(.DATA_WIDTH(61)) i_iobuf (
+    .dio_t ({gpio_t[92:32]}),
+    .dio_i ({gpio_o[92:32]}),
+    .dio_o ({gpio_i[92:32]}),
     .dio_p ({
+              gpio_4_exp_n,             // 92
+              gpio_3_exp_n,             // 91
+              gpio_3_exp_p,             // 90
               hmc7044_gpio_4,           // 89
               hmc7044_gpio_3,           // 88
               hmc7044_gpio_2,           // 87
@@ -596,25 +606,45 @@ module system_top (
     .IB (sysref_d_n),
     .O (sysref_d));
 
-  IBUFGDS i_rx_clk_ibufg_1 (
+  IBUFDS i_rx_clk_ibuf_1 (
     .I (core_clk_a_p),
     .IB (core_clk_a_n),
-    .O (core_clk_a));
+    .O (core_clk_a_ds));
 
-  IBUFGDS i_rx_clk_ibufg_2 (
+  BUFG i_clk_bufg_1 (
+    .I (core_clk_a_ds),
+    .O (core_clk_a)
+  );
+
+  IBUFDS i_rx_clk_ibuf_2 (
     .I (core_clk_b_p),
     .IB (core_clk_b_n),
-    .O (core_clk_b));
+    .O (core_clk_b_ds));
 
-  IBUFGDS i_rx_clk_ibufg_3 (
+  BUFG i_clk_bufg_2 (
+    .I (core_clk_b_ds),
+    .O (core_clk_b)
+  );
+
+  IBUFDS i_rx_clk_ibuf_3 (
     .I (core_clk_c_p),
     .IB (core_clk_c_n),
-    .O (core_clk_c));
+    .O (core_clk_c_ds));
 
-  IBUFGDS i_rx_clk_ibufg_4 (
+  BUFG i_clk_bufg_3 (
+    .I (core_clk_c_ds),
+    .O (core_clk_c)
+  );
+
+  IBUFDS i_rx_clk_ibufg_4 (
     .I (core_clk_d_p),
     .IB (core_clk_d_n),
-    .O (core_clk_d));
+    .O (core_clk_d_ds));
+
+  BUFG i_clk_bufg_4 (
+    .I (core_clk_d_ds),
+    .O (core_clk_d)
+  );
 
   IBUFDS i_ibufds_tx_sync_1 (
     .I (tx_sync_a_p),

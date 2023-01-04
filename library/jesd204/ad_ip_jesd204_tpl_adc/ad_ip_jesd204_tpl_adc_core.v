@@ -29,11 +29,14 @@ module ad_ip_jesd204_tpl_adc_core #(
   parameter SAMPLES_PER_FRAME = 1,
   parameter CONVERTER_RESOLUTION = 14,
   parameter BITS_PER_SAMPLE = 16,
+  parameter DMA_BITS_PER_SAMPLE = 16,
   parameter OCTETS_PER_BEAT = 4,
+  parameter EN_FRAME_ALIGN = 0,
   parameter DATA_PATH_WIDTH = 1,
   parameter LINK_DATA_WIDTH = NUM_LANES * OCTETS_PER_BEAT * 8,
-  parameter DMA_DATA_WIDTH = DATA_PATH_WIDTH * BITS_PER_SAMPLE * NUM_CHANNELS,
-  parameter TWOS_COMPLEMENT = 1
+  parameter DMA_DATA_WIDTH = DATA_PATH_WIDTH * DMA_BITS_PER_SAMPLE * NUM_CHANNELS,
+  parameter TWOS_COMPLEMENT = 1,
+  parameter EXT_SYNC = 0
 ) (
   input clk,
 
@@ -50,7 +53,10 @@ module ad_ip_jesd204_tpl_adc_core #(
 
   input adc_sync,
   output adc_sync_status,
+  input adc_ext_sync_arm,
+  input adc_ext_sync_disarm,
   input adc_sync_in,
+  input adc_sync_manual_req,
   output adc_rst_sync,
 
   input link_valid,
@@ -61,30 +67,35 @@ module ad_ip_jesd204_tpl_adc_core #(
   // Raw and formatted channel data widths
   localparam CDW_RAW = CONVERTER_RESOLUTION * DATA_PATH_WIDTH;
   localparam ADC_DATA_WIDTH = CDW_RAW * NUM_CHANNELS;
-  localparam CDW_FMT = BITS_PER_SAMPLE * DATA_PATH_WIDTH;
+  localparam CDW_FMT = DMA_BITS_PER_SAMPLE * DATA_PATH_WIDTH;
 
   wire [ADC_DATA_WIDTH-1:0] raw_data_s;
+  wire link_valid_tmp;
 
-  reg adc_sync_armed = 1'b0;
-  reg adc_sync_in_d1 = 1'b0;
-  reg adc_sync_d1 = 1'b0;
+  reg link_valid_d = 1'b0;
+  reg link_valid_dd = 1'b0;
 
   assign link_ready = 1'b1;
-  assign adc_valid = {NUM_CHANNELS{link_valid}};
+  assign link_valid_tmp = EN_FRAME_ALIGN ? link_valid_dd : link_valid_d;
+  assign adc_valid = {NUM_CHANNELS{link_valid_tmp & ~adc_sync_armed}};
   assign adc_sync_status = adc_sync_armed;
   assign adc_rst_sync = adc_sync_armed;
 
   always @(posedge clk) begin
-    adc_sync_in_d1 <= adc_sync_in;
-    adc_sync_d1 <= adc_sync;
-    if ((~adc_sync_d1 & adc_sync) == 1'b1) begin
-      adc_sync_armed <= ~adc_sync_armed;
-    end else if ((~adc_sync_in_d1 & adc_sync_in) == 1'b1) begin
-      adc_sync_armed <= 1'b0;
-    end
+    link_valid_d <= link_valid;
+    link_valid_dd <= link_valid_d;
   end
 
   // synchronization logic
+  util_ext_sync #(
+    .ENABLED (EXT_SYNC)
+  ) i_util_ext_sync (
+    .clk (clk),
+    .ext_sync_arm (adc_ext_sync_arm),
+    .ext_sync_disarm (adc_ext_sync_disarm),
+    .sync_in (adc_sync_in | adc_sync_manual_req),
+    .sync_armed (adc_sync_armed)
+  );
 
   ad_ip_jesd204_tpl_adc_deframer #(
     .NUM_LANES (NUM_LANES),
@@ -93,6 +104,7 @@ module ad_ip_jesd204_tpl_adc_core #(
     .CONVERTER_RESOLUTION  (CONVERTER_RESOLUTION),
     .SAMPLES_PER_FRAME (SAMPLES_PER_FRAME),
     .OCTETS_PER_BEAT (OCTETS_PER_BEAT),
+    .EN_FRAME_ALIGN (EN_FRAME_ALIGN),
     .LINK_DATA_WIDTH (LINK_DATA_WIDTH),
     .ADC_DATA_WIDTH (ADC_DATA_WIDTH)
   ) i_deframer (
@@ -109,7 +121,7 @@ module ad_ip_jesd204_tpl_adc_core #(
       .DATA_PATH_WIDTH (DATA_PATH_WIDTH),
       .CONVERTER_RESOLUTION (CONVERTER_RESOLUTION),
       .TWOS_COMPLEMENT (TWOS_COMPLEMENT),
-      .BITS_PER_SAMPLE (BITS_PER_SAMPLE)
+      .BITS_PER_SAMPLE (DMA_BITS_PER_SAMPLE)
     ) i_channel (
       .clk (clk),
 

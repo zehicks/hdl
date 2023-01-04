@@ -35,7 +35,7 @@
 
 `timescale 1ns/100ps
 
-module dmac_request_arb #(
+module request_arb #(
   parameter DMA_DATA_WIDTH_SRC = 64,
   parameter DMA_DATA_WIDTH_DEST = 64,
   parameter DMA_LENGTH_WIDTH = 24,
@@ -57,7 +57,8 @@ module dmac_request_arb #(
   parameter AXI_LENGTH_WIDTH_SRC = 8,
   parameter AXI_LENGTH_WIDTH_DEST = 8,
   parameter ENABLE_DIAGNOSTICS_IF = 0,
-  parameter ALLOW_ASYM_MEM = 0
+  parameter ALLOW_ASYM_MEM = 0,
+  parameter CACHE_COHERENT_DEST = 0
 )(
   input req_clk,
   input req_resetn,
@@ -353,7 +354,7 @@ assign dbg_dest_data_id = dest_data_response_id;
 
 assign dest_data_request_id = dest_address_id;
 
-dmac_dest_mm_axi #(
+dest_axi_mm #(
   .ID_WIDTH(ID_WIDTH),
   .DMA_DATA_WIDTH(DMA_DATA_WIDTH_DEST),
   .DMA_ADDR_WIDTH(DMA_AXI_ADDR_WIDTH),
@@ -361,7 +362,8 @@ dmac_dest_mm_axi #(
   .BYTES_PER_BEAT_WIDTH(BYTES_PER_BEAT_WIDTH_DEST),
   .MAX_BYTES_PER_BURST(MAX_BYTES_PER_BURST),
   .BYTES_PER_BURST_WIDTH(BYTES_PER_BURST_WIDTH),
-  .AXI_LENGTH_WIDTH(AXI_LENGTH_WIDTH_DEST)
+  .AXI_LENGTH_WIDTH(AXI_LENGTH_WIDTH_DEST),
+  .CACHE_COHERENT(CACHE_COHERENT_DEST)
 ) i_dest_dma_mm (
   .m_axi_aclk(m_dest_axi_aclk),
   .m_axi_aresetn(dest_resetn),
@@ -431,7 +433,7 @@ util_axis_fifo #(
   .s_axis_aresetn(src_resetn),
   .s_axis_valid(src_bl_valid),
   .s_axis_ready(src_bl_ready),
-  .s_axis_empty(),
+  .s_axis_full(),
   .s_axis_data(src_burst_length),
   .s_axis_room(),
 
@@ -440,7 +442,8 @@ util_axis_fifo #(
   .m_axis_valid(dest_bl_valid),
   .m_axis_ready(dest_bl_ready),
   .m_axis_data(dest_src_burst_length),
-  .m_axis_level()
+  .m_axis_level(),
+  .m_axis_empty()
 );
 
 // Adapt burst length from source width to destination width by either
@@ -498,7 +501,7 @@ assign dbg_dest_address_id = 'h00;
 assign dbg_dest_data_id = data_id;
 
 
-dmac_dest_axi_stream #(
+dest_axi_stream #(
   .ID_WIDTH(ID_WIDTH),
   .S_AXIS_DATA_WIDTH(DMA_DATA_WIDTH_DEST),
   .BEATS_PER_BURST_WIDTH(BEATS_PER_BURST_WIDTH_DEST)
@@ -560,7 +563,7 @@ assign dest_data_request_id = dest_request_id;
 assign dbg_dest_address_id = 'h00;
 assign dbg_dest_data_id = data_id;
 
-dmac_dest_fifo_inf #(
+dest_fifo_inf #(
   .ID_WIDTH(ID_WIDTH),
   .DATA_WIDTH(DMA_DATA_WIDTH_DEST),
   .BEATS_PER_BURST_WIDTH(BEATS_PER_BURST_WIDTH_DEST)
@@ -621,7 +624,7 @@ assign src_ext_resetn = m_src_axi_aresetn;
 assign dbg_src_address_id = src_address_id;
 assign dbg_src_data_id = src_data_id;
 
-dmac_src_mm_axi #(
+src_axi_mm #(
   .ID_WIDTH(ID_WIDTH),
   .DMA_DATA_WIDTH(DMA_DATA_WIDTH_SRC),
   .DMA_ADDR_WIDTH(DMA_AXI_ADDR_WIDTH),
@@ -708,7 +711,7 @@ assign src_response_resp = 2'b0;
 */
 
 
-dmac_src_axi_stream #(
+src_axi_stream #(
   .ID_WIDTH(ID_WIDTH),
   .S_AXIS_DATA_WIDTH(DMA_DATA_WIDTH_SRC),
   .BEATS_PER_BURST_WIDTH(BEATS_PER_BURST_WIDTH_SRC)
@@ -767,7 +770,7 @@ util_axis_fifo #(
   .s_axis_aresetn(src_resetn),
   .s_axis_valid(rewind_req_valid),
   .s_axis_ready(rewind_req_ready),
-  .s_axis_empty(),
+  .s_axis_full(),
   .s_axis_data(rewind_req_data),
   .s_axis_room(),
 
@@ -776,7 +779,8 @@ util_axis_fifo #(
   .m_axis_valid(req_rewind_req_valid),
   .m_axis_ready(req_rewind_req_ready),
   .m_axis_data(req_rewind_req_data),
-  .m_axis_level()
+  .m_axis_level(),
+  .m_axis_empty()
 );
 
 end else begin
@@ -812,7 +816,7 @@ assign src_response_valid = 1'b0;
 assign src_response_resp = 2'b0;
 */
 
-dmac_src_fifo_inf #(
+src_fifo_inf #(
   .ID_WIDTH(ID_WIDTH),
   .DATA_WIDTH(DMA_DATA_WIDTH_SRC),
   .BEATS_PER_BURST_WIDTH(BEATS_PER_BURST_WIDTH_SRC)
@@ -1028,7 +1032,7 @@ util_axis_fifo #(
   .s_axis_aresetn(src_resetn),
   .s_axis_valid(src_dest_valid_hs_masked),
   .s_axis_ready(src_dest_ready_hs),
-  .s_axis_empty(),
+  .s_axis_full(),
   .s_axis_data({
     src_req_dest_address_cur,
     src_req_xlast_cur
@@ -1043,7 +1047,8 @@ util_axis_fifo #(
     dest_req_dest_address,
     dest_req_xlast
   }),
-  .m_axis_level()
+  .m_axis_level(),
+  .m_axis_empty()
 );
 
 util_axis_fifo #(
@@ -1055,7 +1060,7 @@ util_axis_fifo #(
   .s_axis_aresetn(req_resetn),
   .s_axis_valid(req_src_valid),
   .s_axis_ready(req_src_ready),
-  .s_axis_empty(),
+  .s_axis_full(),
   .s_axis_data({
     req_dest_address,
     req_src_address,
@@ -1077,7 +1082,8 @@ util_axis_fifo #(
     src_req_sync_transfer_start,
     src_req_xlast
   }),
-  .m_axis_level()
+  .m_axis_level(),
+  .m_axis_empty()
 );
 
 // Save the descriptor in the source clock domain since the submission to
@@ -1128,7 +1134,7 @@ assign src_response_empty = 1'b1;
 assign src_response_ready = 1'b1;
 */
 
-dmac_request_generator #(
+request_generator #(
   .ID_WIDTH(ID_WIDTH),
   .BURSTS_PER_TRANSFER_WIDTH(BURSTS_PER_TRANSFER_WIDTH)
 ) i_req_gen (

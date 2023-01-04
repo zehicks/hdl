@@ -92,3 +92,9 @@ _vmake
 *.qdb
 *.qpg
 *.qtl
+*.xpe
+*.gen*
+*.xsa
+*.pdi
+library/*/bd/bd.tcl
+
