@@ -1,4 +1,4 @@
-
+source $ad_hdl_dir/projects/scripts/adi_pd.tcl
 
 # create board design
 # default ports
