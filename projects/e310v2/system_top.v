@@ -100,8 +100,7 @@ module system_top (
   // GPS
   output wire             GPS_RSTN        ,
   output wire             GPS_PWEN        ,
-  output wire             GPS_EXT1        ,
-  output wire             GPS_EXT0        ,
+
 
   // Clock disciplining / AD5662 controls
   output wire             CLK_40M_DAC_nSYNC,
@@ -109,18 +108,13 @@ module system_top (
   output wire             CLK_40M_DAC_DIN ,
 
 
-  output wire             FE_TXRX2_SEL2 ,
   output wire             FE_TXRX2_SEL1 ,
-  output wire             FE_TXRX1_SEL2 ,
   output wire             FE_TXRX1_SEL1 ,
-  output wire             FE_RX2_SEL2 ,
   output wire             FE_RX2_SEL1 ,
-  output wire             FE_RX1_SEL2 ,
   output wire             FE_RX1_SEL1 ,
 
-  inout wire  [28:0]      GPIOB   ,
-  output          tx_amp_en1,
-  output          tx_amp_en2
+  output          TX1_AMP_EN,
+  output          TX2_AMP_EN
   );
 
   // internal signals
@@ -140,21 +134,18 @@ module system_top (
   wire            pll_locked        ;
   wire            ext_ref_is_pps;
 
-  assign tx_amp_en1 = 1'b1;
-  assign tx_amp_en2 = 1'b1;
+  assign TX1_AMP_EN = 1'b1;
+  assign TX2_AMP_EN = 1'b1;
   assign eth_rst_n = 1'b1;
 
-  assign FE_TXRX2_SEL2 = 1'b0;
-  assign FE_TXRX2_SEL1 = 1'b1;
-  assign FE_TXRX1_SEL2 = 1'b1;
-  assign FE_TXRX1_SEL1 = 1'b0;
-  assign FE_RX2_SEL2 = 1'b0;
-  assign FE_RX2_SEL1 = 1'b1;
-  assign FE_RX1_SEL2 = 1'b1;
-  assign FE_RX1_SEL1 = 1'b0;
 
-  assign GPS_RSTN = pll_locked;
-  assign GPS_PWEN = pll_locked;
+  assign FE_TXRX2_SEL1 = 1'b0;
+  assign FE_TXRX1_SEL1 = 1'b1;
+  assign FE_RX2_SEL1 = 1'b0;
+  assign FE_RX1_SEL1 = 1'b1;
+
+  assign GPS_RSTN = 1'b1;
+  assign GPS_PWEN = 1'b1;
 
   // instantiations
 
@@ -201,7 +192,7 @@ module system_top (
       .sclk    ( CLK_40M_DAC_SCLK    ),
       .mosi    ( CLK_40M_DAC_DIN    ),
       .sync_n  ( CLK_40M_DAC_nSYNC  ),
-      .dac_dflt  ( 16'h7fff )
+      .dac_dflt  ( 16'hBfff )
   );
 
 
