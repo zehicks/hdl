@@ -11,19 +11,18 @@ set_property  -dict {PACKAGE_PIN  Y7    IOSTANDARD LVCMOS33} [get_ports PPS_IN] 
 set_property  -dict {PACKAGE_PIN  L16   IOSTANDARD LVCMOS18} [get_ports CLK_40MHz_FPGA]     ;
 set_property  -dict {PACKAGE_PIN  J18   IOSTANDARD LVCMOS18} [get_ports CLKIN_10MHz]       ;
 
-
 #################################################################################################################
 #
 # RF switch and PA
 #
 #################################################################################################################
-set_property  -dict {PACKAGE_PIN  W6    IOSTANDARD LVCMOS33} [get_ports FE_TXRX2_SEL2 ]     ;
+# set_property  -dict {PACKAGE_PIN  W6    IOSTANDARD LVCMOS33} [get_ports FE_TXRX2_SEL2 ]     ;
 set_property  -dict {PACKAGE_PIN  V6    IOSTANDARD LVCMOS33} [get_ports FE_TXRX2_SEL1 ]     ;
-set_property  -dict {PACKAGE_PIN  V10   IOSTANDARD LVCMOS33} [get_ports FE_TXRX1_SEL2 ]     ;
+# set_property  -dict {PACKAGE_PIN  V10   IOSTANDARD LVCMOS33} [get_ports FE_TXRX1_SEL2 ]     ;
 set_property  -dict {PACKAGE_PIN  V11   IOSTANDARD LVCMOS33} [get_ports FE_TXRX1_SEL1 ]     ;
-set_property  -dict {PACKAGE_PIN  Y13   IOSTANDARD LVCMOS33} [get_ports FE_RX2_SEL2 ]       ;
+# set_property  -dict {PACKAGE_PIN  Y13   IOSTANDARD LVCMOS33} [get_ports FE_RX2_SEL2 ]       ;
 set_property  -dict {PACKAGE_PIN  Y12   IOSTANDARD LVCMOS33} [get_ports FE_RX2_SEL1 ]       ;
-set_property  -dict {PACKAGE_PIN  U5    IOSTANDARD LVCMOS33} [get_ports FE_RX1_SEL2 ]       ;
+# set_property  -dict {PACKAGE_PIN  U5    IOSTANDARD LVCMOS33} [get_ports FE_RX1_SEL2 ]       ;
 set_property  -dict {PACKAGE_PIN  T5    IOSTANDARD LVCMOS33} [get_ports FE_RX1_SEL1 ]       ;
 set_property  -dict {PACKAGE_PIN  W11   IOSTANDARD LVCMOS33} [get_ports tx_amp_en1]         ;
 set_property  -dict {PACKAGE_PIN  Y11   IOSTANDARD LVCMOS33} [get_ports tx_amp_en2]         ;
@@ -36,8 +35,17 @@ set_property  -dict {PACKAGE_PIN  Y11   IOSTANDARD LVCMOS33} [get_ports tx_amp_e
 set_property  -dict {PACKAGE_PIN W8	   IOSTANDARD LVCMOS33}     [get_ports GPS_RSTN]        ; 
 set_property  -dict {PACKAGE_PIN W9	   IOSTANDARD LVCMOS33}     [get_ports GPS_PWEN]        ; 
 set_property  -dict {PACKAGE_PIN U9	   IOSTANDARD LVCMOS33}     [get_ports GPS_PPS]         ; 
-set_property  -dict {PACKAGE_PIN W10   IOSTANDARD LVCMOS33}     [get_ports GPS_EXT1]        ; 
-set_property  -dict {PACKAGE_PIN U8	   IOSTANDARD LVCMOS33}     [get_ports GPS_EXT0]        ; 
+# set_property  -dict {PACKAGE_PIN W10   IOSTANDARD LVCMOS33}     [get_ports GPS_EXT1]        ; 
+# set_property  -dict {PACKAGE_PIN U8	   IOSTANDARD LVCMOS33}     [get_ports GPS_EXT0]        ; 
+
+set_property  -dict {PACKAGE_PIN Y6	   IOSTANDARD LVCMOS33}     [get_ports REF_PPS_LOCK]        ; 
+set_property  -dict {PACKAGE_PIN Y9	   IOSTANDARD LVCMOS33}     [get_ports REF_10M_LOCK]         ; 
+set_property  -dict {PACKAGE_PIN Y8	   IOSTANDARD LVCMOS33}     [get_ports PPS_LED]         ; 
+set_property  -dict {PACKAGE_PIN  Y13  IOSTANDARD  LVCMOS33} [get_ports  GPS_RXD]  ;
+set_property  -dict {PACKAGE_PIN  W10  IOSTANDARD  LVCMOS33} [get_ports  GPS_TXD]  ;
+
+
+
 
 
 #################################################################################################################
@@ -128,6 +136,8 @@ set_property  -dict {PACKAGE_PIN U19   IOSTANDARD LVDS_25}     [get_ports tx_dat
 set_property  -dict {PACKAGE_PIN T12   IOSTANDARD LVDS_25}     [get_ports tx_data_out_p[0]]                  ; 
 set_property  -dict {PACKAGE_PIN U12   IOSTANDARD LVDS_25}     [get_ports tx_data_out_n[0]]                  ; 
 
+
+
 # clocks
 
 create_clock -name rx_clk       -period  4 [get_ports rx_clk_in_p]
@@ -140,32 +150,32 @@ create_clock -name rx_clk       -period  4 [get_ports rx_clk_in_p]
 # GPIO
 #
 #################################################################################################################
-set_property  -dict {PACKAGE_PIN H18 IOSTANDARD LVCMOS18} [get_ports GPIOB[28] ]  ;
-set_property  -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS18} [get_ports GPIOB[27] ]  ;
-set_property  -dict {PACKAGE_PIN K18 IOSTANDARD LVCMOS18} [get_ports GPIOB[26] ]  ;
-set_property  -dict {PACKAGE_PIN K17 IOSTANDARD LVCMOS18} [get_ports GPIOB[25] ]  ;
-set_property  -dict {PACKAGE_PIN L17 IOSTANDARD LVCMOS18} [get_ports GPIOB[24] ]  ;
-set_property  -dict {PACKAGE_PIN J19 IOSTANDARD LVCMOS18} [get_ports GPIOB[23] ]  ;
-set_property  -dict {PACKAGE_PIN K19 IOSTANDARD LVCMOS18} [get_ports GPIOB[22] ]  ;
-set_property  -dict {PACKAGE_PIN L20 IOSTANDARD LVCMOS18} [get_ports GPIOB[21] ]  ;
-set_property  -dict {PACKAGE_PIN L19 IOSTANDARD LVCMOS18} [get_ports GPIOB[20] ]  ;
-set_property  -dict {PACKAGE_PIN M18 IOSTANDARD LVCMOS18} [get_ports GPIOB[19] ]  ;
-set_property  -dict {PACKAGE_PIN M17 IOSTANDARD LVCMOS18} [get_ports GPIOB[18] ]  ;
-set_property  -dict {PACKAGE_PIN J15 IOSTANDARD LVCMOS18} [get_ports GPIOB[17] ]  ;
-set_property  -dict {PACKAGE_PIN J16 IOSTANDARD LVCMOS18} [get_ports GPIOB[16] ]  ;
-set_property  -dict {PACKAGE_PIN K16 IOSTANDARD LVCMOS18} [get_ports GPIOB[15] ]  ;
+set_property  -dict {PACKAGE_PIN G18 IOSTANDARD LVCMOS18} [get_ports GPIOB[28] ]  ;
+set_property  -dict {PACKAGE_PIN J20 IOSTANDARD LVCMOS18} [get_ports GPIOB[27] ]  ;
+set_property  -dict {PACKAGE_PIN H20 IOSTANDARD LVCMOS18} [get_ports GPIOB[26] ]  ;
+set_property  -dict {PACKAGE_PIN G19 IOSTANDARD LVCMOS18} [get_ports GPIOB[25] ]  ;
+set_property  -dict {PACKAGE_PIN G20 IOSTANDARD LVCMOS18} [get_ports GPIOB[24] ]  ;
+set_property  -dict {PACKAGE_PIN H15 IOSTANDARD LVCMOS18} [get_ports GPIOB[23] ]  ;
+set_property  -dict {PACKAGE_PIN G15 IOSTANDARD LVCMOS18} [get_ports GPIOB[22] ]  ;
+set_property  -dict {PACKAGE_PIN N15 IOSTANDARD LVCMOS18} [get_ports GPIOB[21] ]  ;
+set_property  -dict {PACKAGE_PIN N16 IOSTANDARD LVCMOS18} [get_ports GPIOB[20] ]  ;
+set_property  -dict {PACKAGE_PIN K14 IOSTANDARD LVCMOS18} [get_ports GPIOB[19] ]  ;
+set_property  -dict {PACKAGE_PIN J14 IOSTANDARD LVCMOS18} [get_ports GPIOB[18] ]  ;
+set_property  -dict {PACKAGE_PIN L14 IOSTANDARD LVCMOS18} [get_ports GPIOB[17] ]  ;
+set_property  -dict {PACKAGE_PIN L15 IOSTANDARD LVCMOS18} [get_ports GPIOB[16] ]  ;
+set_property  -dict {PACKAGE_PIN M14 IOSTANDARD LVCMOS18} [get_ports GPIOB[15] ]  ;
 set_property  -dict {PACKAGE_PIN M15 IOSTANDARD LVCMOS18} [get_ports GPIOB[14] ]  ;
-set_property  -dict {PACKAGE_PIN M14 IOSTANDARD LVCMOS18} [get_ports GPIOB[13] ]  ;
-set_property  -dict {PACKAGE_PIN L15 IOSTANDARD LVCMOS18} [get_ports GPIOB[12] ]  ;
-set_property  -dict {PACKAGE_PIN L14 IOSTANDARD LVCMOS18} [get_ports GPIOB[11] ]  ;
-set_property  -dict {PACKAGE_PIN N16 IOSTANDARD LVCMOS18} [get_ports GPIOB[10] ]  ;
-set_property  -dict {PACKAGE_PIN N15 IOSTANDARD LVCMOS18} [get_ports GPIOB[9] ]  ;
-set_property  -dict {PACKAGE_PIN J14 IOSTANDARD LVCMOS18} [get_ports GPIOB[8] ]  ;
-set_property  -dict {PACKAGE_PIN K14 IOSTANDARD LVCMOS18} [get_ports GPIOB[7] ]  ;
-set_property  -dict {PACKAGE_PIN G15 IOSTANDARD LVCMOS18} [get_ports GPIOB[6] ]  ;
-set_property  -dict {PACKAGE_PIN H15 IOSTANDARD LVCMOS18} [get_ports GPIOB[5] ]  ;
-set_property  -dict {PACKAGE_PIN G20 IOSTANDARD LVCMOS18} [get_ports GPIOB[4] ]  ;
-set_property  -dict {PACKAGE_PIN G19 IOSTANDARD LVCMOS18} [get_ports GPIOB[3] ]  ;
-set_property  -dict {PACKAGE_PIN H20 IOSTANDARD LVCMOS18} [get_ports GPIOB[2] ]  ;
-set_property  -dict {PACKAGE_PIN J20 IOSTANDARD LVCMOS18} [get_ports GPIOB[1] ]  ;
-set_property  -dict {PACKAGE_PIN G18 IOSTANDARD LVCMOS18} [get_ports GPIOB[0] ]  ;
+set_property  -dict {PACKAGE_PIN K16 IOSTANDARD LVCMOS18} [get_ports GPIOB[13] ]  ;
+set_property  -dict {PACKAGE_PIN J16 IOSTANDARD LVCMOS18} [get_ports GPIOB[12] ]  ;
+set_property  -dict {PACKAGE_PIN J15 IOSTANDARD LVCMOS18} [get_ports GPIOB[11] ]  ;
+set_property  -dict {PACKAGE_PIN M18 IOSTANDARD LVCMOS18} [get_ports GPIOB[10] ]  ;
+set_property  -dict {PACKAGE_PIN M17 IOSTANDARD LVCMOS18} [get_ports GPIOB[9] ]  ;
+set_property  -dict {PACKAGE_PIN L19 IOSTANDARD LVCMOS18} [get_ports GPIOB[8] ]  ;
+set_property  -dict {PACKAGE_PIN L20 IOSTANDARD LVCMOS18} [get_ports GPIOB[7] ]  ;
+set_property  -dict {PACKAGE_PIN K19 IOSTANDARD LVCMOS18} [get_ports GPIOB[6] ]  ;
+set_property  -dict {PACKAGE_PIN J19 IOSTANDARD LVCMOS18} [get_ports GPIOB[5] ]  ;
+set_property  -dict {PACKAGE_PIN L17 IOSTANDARD LVCMOS18} [get_ports GPIOB[4] ]  ;
+set_property  -dict {PACKAGE_PIN K17 IOSTANDARD LVCMOS18} [get_ports GPIOB[3] ]  ;
+set_property  -dict {PACKAGE_PIN K18 IOSTANDARD LVCMOS18} [get_ports GPIOB[2] ]  ;
+set_property  -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS18} [get_ports GPIOB[1] ]  ;
+set_property  -dict {PACKAGE_PIN H18 IOSTANDARD LVCMOS18} [get_ports GPIOB[0] ]  ;
