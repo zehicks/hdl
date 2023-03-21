@@ -10,6 +10,7 @@ create_bd_intf_port -mode Master -vlnv xilinx.com:display_processing_system7:fix
 
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:mdio_rtl:1.0 MDIO_PHY
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:rgmii_rtl:1.0 RGMII
+create_bd_intf_port -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 uart_gps
 
 create_bd_port -dir O spi0_csn_2_o
 create_bd_port -dir O spi0_csn_1_o
@@ -55,7 +56,7 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_I2C0_PERIPHERAL_ENABLE 0
 ad_ip_parameter sys_ps7 CONFIG.PCW_UART1_PERIPHERAL_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_UART1_UART1_IO {MIO 12 .. 13}
 ad_ip_parameter sys_ps7 CONFIG.PCW_UART0_PERIPHERAL_ENABLE 1
-ad_ip_parameter sys_ps7 CONFIG.PCW_UART0_UART0_IO {MIO 14 .. 15}
+ad_ip_parameter sys_ps7 CONFIG.PCW_UART0_UART0_IO "EMIO"
 ad_ip_parameter sys_ps7 CONFIG.PCW_I2C1_PERIPHERAL_ENABLE 0
 ad_ip_parameter sys_ps7 CONFIG.PCW_QSPI_PERIPHERAL_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_QSPI_GRP_SINGLE_SS_ENABLE 1
@@ -114,7 +115,7 @@ ad_connect  sys_rstgen/ext_reset_in sys_ps7/FCLK_RESET0_N
 
 ad_connect  sys_rgmii/tx_reset sys_rstgen/peripheral_reset
 ad_connect  sys_rgmii/rx_reset sys_rstgen/peripheral_reset
-ad_connect  sys_rgmii/clkin sys_ps7/FCLK_CLK2 
+ad_connect  sys_rgmii/clkin sys_ps7/FCLK_CLK1 
 ad_connect  sys_ps7/MDIO_ETHERNET_0 sys_rgmii/MDIO_GEM
 ad_connect  sys_ps7/GMII_ETHERNET_0 sys_rgmii/GMII
 ad_connect  sys_rgmii/MDIO_PHY MDIO_PHY
@@ -127,6 +128,7 @@ ad_connect  gpio_i sys_ps7/GPIO_I
 ad_connect  gpio_o sys_ps7/GPIO_O
 ad_connect  gpio_t sys_ps7/GPIO_T
 ad_connect  fixed_io sys_ps7/FIXED_IO
+ad_connect  uart_gps sys_ps7/UART_0 
 
 # ps7 spi connections
 

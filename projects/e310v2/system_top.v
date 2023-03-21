@@ -69,6 +69,9 @@ module system_top (
   inout           fixed_io_ps_porb,
   inout           fixed_io_ps_srstb,
 
+  input           uart_gps_rxd,
+  output          uart_gps_txd,
+
   input           rx_clk_in,
   input           rx_frame_in,
   input   [11:0]  rx_data_in,
@@ -79,6 +82,8 @@ module system_top (
   output          enable,
   output          txnrx,
   input           clk_out,
+
+
 
   inout           gpio_resetb,
   inout           gpio_en_agc,
@@ -96,6 +101,9 @@ module system_top (
   input  wire             PPS_IN          ,
   input  wire             CLKIN_10MHz     ,
   input  wire             PPS_GPS         ,
+  output wire             PPS_LED         ,
+  output wire             PPS_LOCKED      ,
+  output wire             REF_10M_LOCKED      ,
 
   // GPS
   output wire             GPS_RSTN        ,
@@ -125,14 +133,15 @@ module system_top (
   wire            int_40mhz   ;
   wire            ref_pll_clk ;
   wire            locked      ;
-  wire            ref_sel;
+
   wire            ppsgps;
   wire            ppsext;
   wire    [1:0]   pps_sel;
   wire            lpps;
+  wire            ispps;
+  wire            is10meg;
   wire            ref_locked        ;
   wire            pll_locked        ;
-  wire            ext_ref_is_pps;
 
   assign TX1_AMP_EN = 1'b1;
   assign TX2_AMP_EN = 1'b1;
@@ -169,26 +178,29 @@ module system_top (
 
   assign pps_sel = gpio_o[31:30];
   assign gpio_i[32] = ref_locked;
-  assign ext_ref_is_pps = gpio_o[33];
-  assign ref_sel = gpio_o[34];
+
   
   assign gpio_i[31:30] = gpio_o[31:30];
   assign gpio_i[34:33] = gpio_o[34:33];
 
-  assign ppsext = ext_ref_is_pps ? PPS_IN : (ref_sel ? CLKIN_10MHz : 1'b0);
+  assign ppsext = pps_sel==2'b11 ? PPS_IN : 1'b0;
   assign ppsgps = PPS_GPS;
+  assign PPS_LED = PPS_GPS;
+  assign PPS_LOCKED = ref_locked & ispps;
+  assign REF_10M_LOCKED = ref_locked & is10meg;
 
-  ppsloop u_ppsloop(
+
+  ppsloop #(.DEVICE("AD5640")
+  )u_ppsloop(
       .xoclk   ( CLK_40MHz_FPGA   ),
       .ppsgps  ( ppsgps  ),
       .ppsext  ( ppsext  ),
       .refsel  ( pps_sel ),
       .lpps    ( lpps    ),
-      .is10meg (  ),
-      .ispps   (  ),
+      .is10meg ( is10meg ),
+      .ispps   ( ispps ),
       .reflck  ( ref_locked ),
       .plllck  ( pll_locked ),
-      .bus_clk (  ),
       .sclk    ( CLK_40M_DAC_SCLK    ),
       .mosi    ( CLK_40M_DAC_DIN    ),
       .sync_n  ( CLK_40M_DAC_nSYNC  ),
@@ -235,6 +247,8 @@ module system_top (
     .rx_clk_in (rx_clk_in),
     .rx_data_in (rx_data_in),
     .rx_frame_in (rx_frame_in),
+    .uart_gps_rxd(uart_gps_rxd),
+    .uart_gps_txd(uart_gps_txd),
 
     .spi0_clk_i (1'b0),
     .spi0_clk_o (spi_clk),

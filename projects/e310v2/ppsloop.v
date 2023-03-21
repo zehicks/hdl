@@ -5,7 +5,10 @@
 `timescale 1ns / 1ps
 
 
-module ppsloop(
+module ppsloop#(
+  parameter DEVICE = "AD5640" //valid parameter LTC2640, AD5640, AD5660/2
+)(
+    input reset,
     input xoclk, // 40 MHz from VCTCXO
     input ppsgps,
     input ppsext,
@@ -15,7 +18,7 @@ module ppsloop(
     output reg ispps,
     output reg reflck,
     output plllck,// status of things
-    output bus_clk,
+    output clk_int40,
     output sclk,
     output mosi,
     output sync_n,
@@ -23,16 +26,16 @@ module ppsloop(
    );
   wire ppsref = (refsel==2'b00)?ppsgps:
                 (refsel==2'b11)?ppsext:
-                                1'b0;
+                                ppsgps;
   // reference pps to discilpline the VCTX|CXO to, from GPS or EXT in
 
   wire clk_200M_o, clk;
-  wire clk_100M_o;
   BUFG x_clk_gen ( .I(clk_200M_o), .O(clk));
-  BUFG bus_clk_gen ( .I(clk_100M_o), .O(bus_clk));
   wire clk_40M;
+  wire pps_loop_rst;
 
-  assign pll_clk = clk;
+  assign clk_int40 = clk_40M;
+  assign pps_loop_rst = ~plllck;
 
   wire n_pps = (refsel==2'b01) | (refsel==2'b10);
   reg _npps, no_pps;
@@ -43,7 +46,6 @@ module ppsloop(
      .CLKFBOUT_MULT(30),
      .CLKOUT0_DIVIDE(6),
      .CLKOUT1_DIVIDE(30),
-     .CLKOUT2_DIVIDE(12),
      .CLKIN1_PERIOD(25.0)
    )
    clkgen (
@@ -51,7 +53,6 @@ module ppsloop(
       .CLKIN1(xoclk),
       .CLKOUT0(clk_200M_o),
       .CLKOUT1(clk_40M),
-      .CLKOUT2(clk_100M_o),
       .LOCKED(plllck)
    );
 
@@ -79,9 +80,15 @@ module ppsloop(
   wire recycle = (28'd199_999_999==lcnt); // sets the period, 1 sec
 
   always @(posedge clk) begin
-    sstate <= nxt_sstate;
-    lcnt <= nxt_lcnt;
-    lpps <= lcnt > 28'd150_000_000; // ~25% duty cycle
+    if (pps_loop_rst) begin
+      sstate <= REFDET;
+      lcnt <= 'd0;
+      lpps <= 1'b0; 
+    end else begin
+      sstate <= nxt_sstate;
+      lcnt <= nxt_lcnt;
+      lpps <= lcnt > 28'd150_000_000; // ~25% duty cycle
+    end
   end
 
   /* Reference signal detection:
@@ -110,11 +117,16 @@ module ppsloop(
   reg tpps;
   wire [23:0] nxt_tcnt = (~is10meg | tcnt==24'd9999999) ? 24'b0 : tcnt+1'b1;
   always @(posedge ppsref) begin
-    /* note this is clocked by the reference signal and is not useful when
-     * the reference is a pps.
-     */
-    tcnt <= nxt_tcnt;
-    tpps <= (tcnt>24'd7499999);
+    if (pps_loop_rst) begin
+      tcnt <= 'd0;
+      tpps <= 1'b0;
+    end  else  begin
+      /* note this is clocked by the reference signal and is not useful when
+      * the reference is a pps.
+      */
+      tcnt <= nxt_tcnt;
+      tpps <= (tcnt>24'd7499999);
+    end
   end
 
   /* The reference needs to be synchronized into the local clock domain,
@@ -126,10 +138,16 @@ module ppsloop(
   reg [2:0] tsmp;
   reg [2:0] xosmp;
   always @(posedge clk) begin
-    // apply same sync delay to all pps flavors
-    refsmp <= { refsmp[1:0], ppsref};
-    tsmp <= { tsmp[1:0], tpps};
-    xosmp <= { xosmp[1:0], lpps };
+    if (pps_loop_rst) begin
+      refsmp <= { refsmp[1:0], ppsref};
+      tsmp <= { tsmp[1:0], tpps};
+      xosmp <= { xosmp[1:0], lpps };
+    end  else begin
+      // apply same sync delay to all pps flavors
+      refsmp <= { refsmp[1:0], ppsref};
+      tsmp <= { tsmp[1:0], tpps};
+      xosmp <= { xosmp[1:0], lpps };
+    end
   end
 
 
@@ -150,47 +168,62 @@ module ppsloop(
   reg pcnt_ovfl;
   wire [5:0]  nxt_pcnt = (rising_r | pcnt_ovfl) ? 6'b0 : pcnt+1'b1;
   always @(posedge clk) begin
-    pcnt <= nxt_pcnt;
-    if (rcnt_ovfl)
-      is10meg <= 1'b0;
-    else if (pcnt == 6'b111111) begin
-      pcnt_ovfl <= 1'b1;
-      is10meg <= 1'b0;
-    end
-    else if (rising_r) begin
-      is10meg <=  (pcnt > 6'd16) & (pcnt < 6'd24);
+    if (pps_loop_rst) begin
+      pcnt <= 'd0;
       pcnt_ovfl <= 1'b0;
+      is10meg <= 1'b0;
+    end else begin
+      pcnt <= nxt_pcnt;
+      if (rcnt_ovfl)
+        is10meg <= 1'b0;
+      else if (pcnt == 6'b111111) begin
+        pcnt_ovfl <= 1'b1;
+        is10meg <= 1'b0;
+      end
+      else if (rising_r) begin
+        is10meg <=  (pcnt > 6'd16) & (pcnt < 6'd24);
+        pcnt_ovfl <= 1'b0;
+      end
     end
+
   end
 
   reg rr;
   assign nxt_rcnt = rr ? 28'b0 : rcnt+1'b1;
   always @(posedge clk) begin
-    rr <= rising_ref;
-    ple[3:0] <= {ple[2:0],rising_ref & valid_ref};
+    if (pps_loop_rst) begin
+      rr <= 1'b0;
+      ple <= 'd0;
+      rcnt <= 'd0;
+      ispps <= 1'b0;
+      rcnt_ovfl <= 'd0;
+    end else begin
+      rr <= rising_ref;
+      ple[3:0] <= {ple[2:0],rising_ref & valid_ref};
 
-    rcnt <= nxt_rcnt;
+      rcnt <= nxt_rcnt;
 
-    // set the overflow flag if no reference edge is detected and
-    // hold it asserted until an edge does arrive. This allows clearing of
-    // the other flags, even if there is no reference.
-    if (rcnt==28'b1111111111111111111111111111)
-      rcnt_ovfl <= 1'b1;
-    else if (rr)
-      rcnt_ovfl <= 1'b0;
+      // set the overflow flag if no reference edge is detected and
+      // hold it asserted until an edge does arrive. This allows clearing of
+      // the other flags, even if there is no reference.
+      if (rcnt==28'b1111111111111111111111111111)
+        rcnt_ovfl <= 1'b1;
+      else if (rr)
+        rcnt_ovfl <= 1'b0;
 
-    if (rr) begin
-      // a rising edge arrived, grab the count and compare to bounds
-      rlst <= rcnt;
-    end
-    if (rr | rcnt_ovfl) begin
-      ispps <= ~is10meg & ~rcnt_ovfl & (rcnt > 28'd199997000) & (rcnt < 200003000);
-      /* reference frequency detect limits:
-       * 10M sampled with 200M should be 20 cycles, 16-24 provides xtra margin
-       * to allow for tolerances and possibly sampling at jittery edges
-       * allow +- 15 ppm on a pps signal
-       */
+      if (rr) begin
+        // a rising edge arrived, grab the count and compare to bounds
+        rlst <= rcnt;
+      end
+      if (rr | rcnt_ovfl) begin
+        ispps <= ~is10meg & ~rcnt_ovfl & (rcnt > 28'd199997000) & (rcnt < 200003000);
+        /* reference frequency detect limits:
+        * 10M sampled with 200M should be 20 cycles, 16-24 provides xtra margin
+        * to allow for tolerances and possibly sampling at jittery edges
+        * allow +- 15 ppm on a pps signal
+        */
 
+      end
     end
   end
 
@@ -385,6 +418,9 @@ module ppsloop(
    */
 
   always @(posedge clk) begin
+    if (pps_loop_rst ) begin
+      daco <= dac_dflt;
+    end
     if (no_pps) begin
      daco <= dac_dflt;
     end
@@ -409,13 +445,36 @@ module ppsloop(
     reflck <= refinternal | fadj;
   end
 
-  ad5662_auto_spi dac
-  (
-    .clk(clk),
-    .dat(daco),
-    .sclk(sclk),
-    .mosi(mosi),
-    .sync_n(sync_n)
-  );
+  generate
+      if (DEVICE=="AD5660") begin
+        ad5662_auto_spi dac
+        (
+          .clk(clk),
+          .dat(daco),
+          .sclk(sclk),
+          .mosi(mosi),
+          .sync_n(sync_n)
+        );
+      end  else if (DEVICE=="AD5640") begin
+        ad5640_spi u_ad5640_spi(
+            .clk  ( clk  ),
+            .rst  ( pps_loop_rst  ),
+            .data ( daco[15:2] ),
+            .sclk ( sclk ),
+            .mosi ( mosi ),
+            .sync_n  ( sync_n  )
+        ); 
+      end else begin
+        ltc2630_spi u_ltc2630_spi(
+            .clk  ( clk  ),
+            .rst  ( pps_loop_rst),
+            .data ( daco ),
+            .sclk ( sclk ),
+            .mosi ( mosi ),
+            .sync_n  ( sync_n  )
+        );
+      end
+  endgenerate
+
 
 endmodule

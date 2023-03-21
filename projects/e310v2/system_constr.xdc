@@ -94,11 +94,15 @@ set_property  -dict {PACKAGE_PIN  V11  IOSTANDARD  LVCMOS33} [get_ports  FE_TXRX
 set_property  -dict {PACKAGE_PIN  V6   IOSTANDARD  LVCMOS33} [get_ports  FE_TXRX2_SEL1]  ;
 set_property  -dict {PACKAGE_PIN  W11  IOSTANDARD  LVCMOS33} [get_ports  TX1_AMP_EN]  ;
 set_property  -dict {PACKAGE_PIN  Y11  IOSTANDARD  LVCMOS33} [get_ports  TX2_AMP_EN]  ;
-
+set_property  -dict {PACKAGE_PIN  Y13  IOSTANDARD  LVCMOS33} [get_ports  uart_gps_rxd]  ;
+set_property  -dict {PACKAGE_PIN  W10  IOSTANDARD  LVCMOS33} [get_ports  uart_gps_txd]  ;
 
 set_property  -dict {PACKAGE_PIN  L16  IOSTANDARD  LVCMOS18} [get_ports  CLK_40MHz_FPGA]  ;
 set_property  -dict {PACKAGE_PIN  J18  IOSTANDARD  LVCMOS18} [get_ports  CLKIN_10MHz]  ;
-set_property  -dict {PACKAGE_PIN  Y7  IOSTANDARD  LVCMOS33} [get_ports  PPS_IN]  ;
+set_property  -dict {PACKAGE_PIN  Y7   IOSTANDARD  LVCMOS33} [get_ports  PPS_IN]  ;
+set_property  -dict {PACKAGE_PIN  Y8   IOSTANDARD  LVCMOS33} [get_ports  PPS_LED]  ;
+set_property  -dict {PACKAGE_PIN  Y6   IOSTANDARD  LVCMOS33} [get_ports  PPS_LOCKED]  ;
+set_property  -dict {PACKAGE_PIN  Y9   IOSTANDARD  LVCMOS33} [get_ports  REF_10M_LOCKED]  ;
 # TX_AMP_EN	    G15
 # FPGA_GCLK1	K17
 # EEPROM_I2C_SDA	C6

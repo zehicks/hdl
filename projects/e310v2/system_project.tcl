@@ -10,7 +10,7 @@ adi_project_files e310v2 [list \
   "system_top.v" \
   "system_constr.xdc" \
   "ppsloop.v" \
-  "ad5662_auto_spi.v" \
+  "ad5640_spi.v" \
   "$ad_hdl_dir/library/common/ad_iobuf.v"]
 
 set_property is_enabled false [get_files  *system_sys_ps7_0.xdc]
