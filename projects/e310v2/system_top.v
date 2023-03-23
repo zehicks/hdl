@@ -192,12 +192,14 @@ module system_top (
     assign tx_amp_en1 = 1'b1;
     assign tx_amp_en2 = 1'b1;
     assign eth_rst_n = 1'b1;
+    assign GPS_RSTN = 1'b1;
+    assign GPS_PWEN = 1'b1;
   
 
-    assign FE_TXRX2_SEL1 = 1'b1;
-    assign FE_TXRX1_SEL1 = 1'b0;
-    assign FE_RX2_SEL1 = 1'b1;
-    assign FE_RX1_SEL1 = 1'b0;
+    assign FE_TXRX2_SEL1 = 1'b0;
+    assign FE_TXRX1_SEL1 = 1'b1;
+    assign FE_RX2_SEL1 = 1'b0;
+    assign FE_RX1_SEL1 = 1'b1;
   
 
     assign pps_sel = gpio_o[31:30];
