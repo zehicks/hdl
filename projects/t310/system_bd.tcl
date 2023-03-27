@@ -50,12 +50,16 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_RESET_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_ENET0_RESET_IO "MIO 7"
 ad_ip_parameter sys_ps7 CONFIG.PCW_SD0_PERIPHERAL_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_SDIO_PERIPHERAL_FREQMHZ 50
+ad_ip_parameter sys_ps7 CONFIG.PCW_SD1_PERIPHERAL_ENABLE 1
+ad_ip_parameter sys_ps7 CONFIG.PCW_SDIO_PERIPHERAL_FREQMHZ 50
+ad_ip_parameter sys_ps7 CONFIG.PCW_SD1_SD1_IO "MIO 46 .. 51"
 ad_ip_parameter sys_ps7 CONFIG.PCW_UART0_PERIPHERAL_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_UART0_UART0_IO {MIO 14 .. 15}
 ad_ip_parameter sys_ps7 CONFIG.PCW_UART1_PERIPHERAL_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_UART1_UART1_IO {MIO 12 .. 13}
 ad_ip_parameter sys_ps7 CONFIG.PCW_I2C0_PERIPHERAL_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_I2C0_I2C0_IO {MIO 10 .. 11} 
+ad_ip_parameter sys_ps7 CONFIG.PCW_I2C0_RESET_IO "MIO 0" 
 ad_ip_parameter sys_ps7 CONFIG.PCW_USB0_PERIPHERAL_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_USB0_RESET_ENABLE 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_USB0_RESET_IO "MIO 8"
