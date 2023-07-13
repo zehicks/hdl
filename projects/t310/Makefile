@@ -4,7 +4,7 @@
 ## Auto-generated, do not modify!
 ####################################################################################
 
-PROJECT_NAME := fmcomms5_zc706
+PROJECT_NAME := t310
 
 M_DEPS += ../scripts/adi_pd.tcl
 M_DEPS += ../../library/common/ad_iobuf.v
