@@ -291,7 +291,7 @@ module system_top (
   assign spi_mosi_0 = spi0_mosi;
   assign spi_clk_1 = spi0_clk;
   assign spi_mosi_1 = spi0_mosi;
-  assign CLK_PLL_LE = spi0_clk;
+  assign CLK_PLL_SCLK = spi0_clk;
   assign CLK_PLL_MOSI = spi0_mosi;
   assign spi0_miso = (spi0_csn[0]==1'b0) ? spi_miso_0 : (spi0_csn[1]==1'b0) ? spi_miso_1 : 1'b1;
   assign gpio_i[63:60] = gpio_o[63:60];
