@@ -52,8 +52,8 @@ set_property  -dict {PACKAGE_PIN  AG29   IOSTANDARD LVCMOS25}  [get_ports mcs_sy
 set_property  -dict {PACKAGE_PIN  AJ30   IOSTANDARD LVCMOS25}  [get_ports gpio_resetb_1]                         ; 
 set_property  -dict {PACKAGE_PIN  AK30   IOSTANDARD LVCMOS25}  [get_ports enable_1]                              ; 
 set_property  -dict {PACKAGE_PIN  AH26   IOSTANDARD LVCMOS25}  [get_ports txnrx_1]                               ; 
-set_property  -dict {PACKAGE_PIN  AJ18   IOSTANDARD LVCMOS33}  [get_ports gpio_calsw_1_0]                        ; 
-set_property  -dict {PACKAGE_PIN  AH18   IOSTANDARD LVCMOS33}  [get_ports gpio_calsw_2_0]                        ; 
+# set_property  -dict {PACKAGE_PIN  AJ18   IOSTANDARD LVCMOS33}  [get_ports gpio_calsw_1_0]                        ; 
+# set_property  -dict {PACKAGE_PIN  AH18   IOSTANDARD LVCMOS33}  [get_ports gpio_calsw_2_0]                        ; 
 
 # spi
 
@@ -127,18 +127,55 @@ set_property  -dict {PACKAGE_PIN  AK20  IOSTANDARD LVCMOS25}  [get_ports mcs_syn
 set_property  -dict {PACKAGE_PIN  U26  IOSTANDARD LVCMOS33}  [get_ports ref_clk]                       ; 
 
 
-set_property  -dict {PACKAGE_PIN  AK13  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_TXRX1_SEL1]                    ; 
+set_property  -dict {PACKAGE_PIN  AK16  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_TXRX2_SEL2]                    ; 
 set_property  -dict {PACKAGE_PIN  AJ16  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_TXRX2_SEL1]                    ; 
-set_property  -dict {PACKAGE_PIN  AK12  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_RX1_SEL1]                      ; 
+set_property  -dict {PACKAGE_PIN  AK12  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_TXRX1_SEL2]                    ; 
+set_property  -dict {PACKAGE_PIN  AK13  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_TXRX1_SEL1]                    ; 
+set_property  -dict {PACKAGE_PIN  AK15  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_RX2_SEL2]                      ; 
 set_property  -dict {PACKAGE_PIN  AJ15  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_RX2_SEL1]                      ; 
+set_property  -dict {PACKAGE_PIN  AG14  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_RX1_SEL2]                      ; 
+set_property  -dict {PACKAGE_PIN  AF14  IOSTANDARD LVCMOS33}  [get_ports CH1_FE_RX1_SEL1]                      ; 
 set_property  -dict {PACKAGE_PIN  AJ14  IOSTANDARD LVCMOS33}  [get_ports CH1_TX1_AMP_EN]                       ; 
 set_property  -dict {PACKAGE_PIN  AJ13  IOSTANDARD LVCMOS33}  [get_ports CH1_TX2_AMP_EN]                       ; 
+
+set_property  -dict {PACKAGE_PIN  AF13  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_TXRX2_SEL2]                    ; 
+set_property  -dict {PACKAGE_PIN  AE13  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_TXRX2_SEL1]                    ; 
+set_property  -dict {PACKAGE_PIN  AH16  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_TXRX1_SEL2]                    ; 
 set_property  -dict {PACKAGE_PIN  AH17  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_TXRX1_SEL1]                    ; 
-set_property  -dict {PACKAGE_PIN  AH12  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_TXRX2_SEL1]                    ; 
-set_property  -dict {PACKAGE_PIN  AH16  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_RX1_SEL1]                      ; 
+set_property  -dict {PACKAGE_PIN  AH12  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_RX2_SEL2]                      ; 
 set_property  -dict {PACKAGE_PIN  AG12  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_RX2_SEL1]                      ; 
+set_property  -dict {PACKAGE_PIN  AG16  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_RX1_SEL2]                      ; 
+set_property  -dict {PACKAGE_PIN  AG17  IOSTANDARD LVCMOS33}  [get_ports CH2_FE_RX1_SEL1]                      ; 
+
 set_property  -dict {PACKAGE_PIN  AH14  IOSTANDARD LVCMOS33}  [get_ports CH2_TX1_AMP_EN]                       ; 
 set_property  -dict {PACKAGE_PIN  AH13  IOSTANDARD LVCMOS33}  [get_ports CH2_TX2_AMP_EN]                       ; 
+
+
+set_property  -dict {PACKAGE_PIN  AG15  IOSTANDARD LVCMOS33}  [get_ports CAL_SW2_SEL2]                      ; 
+set_property  -dict {PACKAGE_PIN  AF15  IOSTANDARD LVCMOS33}  [get_ports CAL_SW2_SEL1]                      ; 
+set_property  -dict {PACKAGE_PIN  AH18  IOSTANDARD LVCMOS33}  [get_ports CAL_SW1_SEL2]                      ; 
+set_property  -dict {PACKAGE_PIN  AJ18  IOSTANDARD LVCMOS33}  [get_ports CAL_SW1_SEL1]                      ; 
+
+
+
+set_property  -dict {PACKAGE_PIN  W25  IOSTANDARD LVCMOS33}  [get_ports CLK_PLL_MOSI]                      ; 
+set_property  -dict {PACKAGE_PIN  W26  IOSTANDARD LVCMOS33}  [get_ports CLK_PLL_LE]                        ; 
+set_property  -dict {PACKAGE_PIN  U25  IOSTANDARD LVCMOS33}  [get_ports CLK_PLL_SCLK]                      ; 
+set_property  -dict {PACKAGE_PIN  R27  IOSTANDARD LVCMOS33}  [get_ports CLK_MUX_OUT]                       ; 
+set_property  -dict {PACKAGE_PIN  R28  IOSTANDARD LVCMOS33}  [get_ports REF_CLK_SEL]                       ; 
+
+set_property  -dict {PACKAGE_PIN  N27  IOSTANDARD LVCMOS33}  [get_ports GPS_RXD]                        ; 
+set_property  -dict {PACKAGE_PIN  N26  IOSTANDARD LVCMOS33}  [get_ports GPS_TXD]                        ; 
+set_property  -dict {PACKAGE_PIN  W28  IOSTANDARD LVCMOS33}  [get_ports GPS_RSTn]                       ; 
+
+
+
+set_property  -dict {PACKAGE_PIN  P21  IOSTANDARD LVCMOS33}  [get_ports {PL_LED[0]}]                       ; 
+set_property  -dict {PACKAGE_PIN  T22  IOSTANDARD LVCMOS33}  [get_ports {PL_LED[1]}]                       ; 
+set_property  -dict {PACKAGE_PIN  R23  IOSTANDARD LVCMOS33}  [get_ports {PL_LED[2]}]                       ; 
+set_property  -dict {PACKAGE_PIN  V22  IOSTANDARD LVCMOS33}  [get_ports {PL_LED[3]}]                       ; 
+
+
 
 # clocks
 

@@ -34,6 +34,18 @@ set_property  -dict {PACKAGE_PIN  A20  IOSTANDARD LVCMOS33} [get_ports rx2_band_
 set_property  -dict {PACKAGE_PIN  D18  IOSTANDARD LVCMOS33} [get_ports tx2_band_sel_h]  ;
 set_property  -dict {PACKAGE_PIN  D19  IOSTANDARD LVCMOS33} [get_ports tx2_band_sel_l]  ;
 
+
+
+set_property  -dict {PACKAGE_PIN  K17   IOSTANDARD LVCMOS33} [get_ports CLK_40MHz_FPGA  ]  ;
+set_property  -dict {PACKAGE_PIN  J18   IOSTANDARD LVCMOS33} [get_ports PPS_IN  ]  ;
+set_property  -dict {PACKAGE_PIN  T9    IOSTANDARD LVCMOS33} [get_ports CLKIN_10MHz ]  ;
+set_property  -dict {PACKAGE_PIN  V6    IOSTANDARD LVCMOS33} [get_ports CLKIN_10MHz_REQ ]  ;
+set_property  -dict {PACKAGE_PIN  K16   IOSTANDARD LVCMOS33} [get_ports CLK_40M_DAC_nSYNC   ]  ;
+set_property  -dict {PACKAGE_PIN  J16   IOSTANDARD LVCMOS33} [get_ports CLK_40M_DAC_SCLK    ]  ;
+set_property  -dict {PACKAGE_PIN  J15   IOSTANDARD LVCMOS33} [get_ports CLK_40M_DAC_DIN ]  ;
+
+
+
 set_property  -dict {PACKAGE_PIN P19  IOSTANDARD LVDS_25 } [get_ports  tx_clk_out_n     ]   ;
 set_property  -dict {PACKAGE_PIN N18  IOSTANDARD LVDS_25 } [get_ports  tx_clk_out_p     ]   ;
 set_property  -dict {PACKAGE_PIN Y14  IOSTANDARD LVDS_25 } [get_ports  tx_data_out_n[0] ]   ;

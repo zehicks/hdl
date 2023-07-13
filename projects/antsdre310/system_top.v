@@ -89,6 +89,18 @@ module system_top (
   output          spi_mosi,
   input           spi_miso,
 
+    // clock form vctcxo
+  input  wire	 			      CLK_40MHz_FPGA  ,
+  // PPS or 10 MHz (need to choose from SW)
+  input  wire             PPS_IN          ,
+  input  wire             CLKIN_10MHz     ,
+  output wire             CLKIN_10MHz_REQ ,
+
+  // Clock disciplining / LTC2630 controls
+  output wire             CLK_40M_DAC_nSYNC,
+  output wire             CLK_40M_DAC_SCLK ,
+  output wire             CLK_40M_DAC_DIN ,
+
   output          rx1_band_sel_h,
   output          rx1_band_sel_l,
   output          tx1_band_sel_h,
@@ -124,6 +136,39 @@ module system_top (
   assign rx2_band_sel_l = gpio_o[5];
   assign tx2_band_sel_h = gpio_o[6];
   assign tx2_band_sel_l = gpio_o[7];
+
+
+  wire            ref_sel;
+  wire            ext_ref;
+  wire            ext_ref_is_pps;
+  wire            ext_ref_locked;
+  wire            ppsgps;
+  wire            ppsext;
+  wire            pll_locked;
+
+  assign ext_ref_is_pps = gpio_o[8];
+  assign ref_sel = gpio_o[9];
+  assign gpio_i[10] = ext_ref_locked;
+  assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? PPS_IN : CLKIN_10MHz;
+
+  ppsloop #(.DEVICE("LTC2630")
+  )u_ppsloop(
+      .xoclk   ( CLK_40MHz_FPGA   ),
+      .ppsgps  ( ppsgps  ),
+      .ppsext  ( ppsext  ),
+      .refsel  ( 2'b00 ),
+      .lpps    (     ),
+      .is10meg (  ),
+      .ispps   (  ),
+      .reflck  ( ext_ref_locked ),
+      .plllck  ( pll_locked ),
+      .sclk    ( CLK_40M_DAC_SCLK    ),
+      .mosi    ( CLK_40M_DAC_DIN    ),
+      .sync_n  ( CLK_40M_DAC_nSYNC  ),
+      .dac_dflt  ( 16'hBfff )
+  );
+
+  assign CLKIN_10MHz_REQ = 1'b1;
 
   ad_iobuf #(.DATA_WIDTH(15)) i_iobuf (
     .dio_t ( gpio_t[46:32]),

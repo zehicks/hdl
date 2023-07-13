@@ -82,8 +82,7 @@ module system_top (
   output                  enable_0,
   output                  txnrx_0,
 
-  inout                   gpio_calsw_1_0,
-  inout                   gpio_calsw_2_0,
+
 
 
   input                   rx_clk_in_1_p,
@@ -105,23 +104,46 @@ module system_top (
   output                  enable_1,
   output                  txnrx_1,
 
-  input                   ref_clk         ,
-
-  output                  CH1_FE_TXRX1_SEL1 ,
+  
+  output                  CH1_FE_TXRX2_SEL2 ,
   output                  CH1_FE_TXRX2_SEL1 ,
-  output                  CH1_FE_RX1_SEL1 ,
+  output                  CH1_FE_TXRX1_SEL2 ,
+  output                  CH1_FE_TXRX1_SEL1 ,
+  output                  CH1_FE_RX2_SEL2 ,
   output                  CH1_FE_RX2_SEL1 ,
-  output                  CH1_TX1_AMP_EN,
-  output                  CH1_TX2_AMP_EN,
+  output                  CH1_FE_RX1_SEL2 ,
+  output                  CH1_FE_RX1_SEL1 ,
+  output                  CH1_TX1_AMP_EN  ,
+  output                  CH1_TX2_AMP_EN  ,
 
-  output                  CH2_FE_TXRX1_SEL1 ,
+  output                  CH2_FE_TXRX2_SEL2 ,
   output                  CH2_FE_TXRX2_SEL1 ,
-  output                  CH2_FE_RX1_SEL1 ,
+  output                  CH2_FE_TXRX1_SEL2 ,
+  output                  CH2_FE_TXRX1_SEL1 ,
+  output                  CH2_FE_RX2_SEL2 ,
   output                  CH2_FE_RX2_SEL1 ,
-  output                  CH2_TX1_AMP_EN,
-  output                  CH2_TX2_AMP_EN,
+  output                  CH2_FE_RX1_SEL2 ,
+  output                  CH2_FE_RX1_SEL1 ,
+  output                  CH2_TX1_AMP_EN  ,
+  output                  CH2_TX2_AMP_EN  ,
 
 
+  output  reg             CAL_SW2_SEL2,
+  output  reg             CAL_SW2_SEL1,
+  output  reg             CAL_SW1_SEL2,
+  output  reg             CAL_SW1_SEL1,
+
+  output  wire            CLK_PLL_MOSI  ,
+  output  wire            CLK_PLL_LE    ,
+  output  wire            CLK_PLL_SCLK  ,
+  input   wire            CLK_MUX_OUT   ,
+  output  wire            REF_CLK_SEL   ,
+
+  output  wire  [3:0]     PL_LED        ,
+
+  input                   GPS_RXD       ,
+  output                  GPS_TXD       ,
+  output                  GPS_RSTn      ,
 
   output                  spi_ad9361_1,
   output                  spi_clk_1,
@@ -136,12 +158,13 @@ module system_top (
 
   // internal registers
 
-  reg     [  2:0] mcs_sync_m = 'd0;
+  reg     [  3:0] mcs_sync_m = 'd0;
   reg     mcs_sync;
 
   // internal signals
   wire    [1:0]   cal_sw;
   wire            sys_100m_resetn;
+  wire            ref_clk         ;
   wire            ref_clk_s;
   wire    [ 63:0] gpio_i;
   wire    [ 63:0] gpio_o;
@@ -162,31 +185,40 @@ module system_top (
   wire            gpio_calsw_4_1;
   wire            gpio_ad5355_rfen;
   wire            gpio_ad5355_lock;
+  wire            gpio_calsw_1_0;
+  wire            gpio_calsw_2_0;
 
   assign mcs_sync_0 = mcs_sync;
   assign mcs_sync_1 = mcs_sync;
+
+  assign PL_LED[0] = CLK_MUX_OUT;
+  assign REF_CLK_SEL = 1'b1;
+  assign GPS_RSTn = 1'b1;
 
 
   // multi-chip synchronization
 
   always @(posedge ref_clk or negedge sys_100m_resetn) begin
     if (sys_100m_resetn == 1'b0) begin
-      mcs_sync_m <= 3'd0;
+      mcs_sync_m <= 4'd0;
       mcs_sync <= 1'd0;
     end else begin
-      mcs_sync_m <= {mcs_sync_m[1:0], gpio_o[45]};
-      mcs_sync <= mcs_sync_m[2] & ~mcs_sync_m[1];
+      mcs_sync_m <= {mcs_sync_m[2:0], gpio_o[45]};
+      mcs_sync <= (mcs_sync_m[2] & ~mcs_sync_m[1]) | (mcs_sync_m[3] & ~mcs_sync_m[2]);
     end
   end
 
   assign cal_sw = gpio_o[54:53];
 
-  // vio_0 your_instance_name (
-  //   .clk(ref_clk),              // input wire clk
-  //   .probe_in0(cal_sw)  // input wire [1 : 0] probe_in0
-  // );
+  always @(*) begin
+    case (cal_sw)
+      2'b00: {CAL_SW1_SEL1, CAL_SW1_SEL2, CAL_SW2_SEL1, CAL_SW2_SEL2} = 4'b0101;
+      2'b01: {CAL_SW1_SEL1, CAL_SW1_SEL2, CAL_SW2_SEL1, CAL_SW2_SEL2} = 4'b0110;
+      2'b10: {CAL_SW1_SEL1, CAL_SW1_SEL2, CAL_SW2_SEL1, CAL_SW2_SEL2} = 4'b1001;
+      2'b11: {CAL_SW1_SEL1, CAL_SW1_SEL2, CAL_SW2_SEL1, CAL_SW2_SEL2} = 4'b1010;
+    endcase
+  end
 
-  // // instantiations
 
   // IBUFGDS i_ref_clk_ibuf (
   //   .I (ref_clk_p),
@@ -201,17 +233,28 @@ module system_top (
 
   assign CH1_TX1_AMP_EN = 1'b1;
   assign CH1_TX2_AMP_EN = 1'b1;
-  assign CH1_FE_TXRX2_SEL1 = 1'b0;
-  assign CH1_FE_TXRX1_SEL1 = 1'b1;
-  assign CH1_FE_RX2_SEL1 = 1'b0;
-  assign CH1_FE_RX1_SEL1 = 1'b1;
+  assign CH1_FE_TXRX1_SEL1  = 1'b1;  
+  assign CH1_FE_TXRX1_SEL2  = 1'b0;  
+  assign CH1_FE_RX1_SEL1    = 1'b1;
+  assign CH1_FE_RX1_SEL2    = 1'b0;
+  assign CH1_FE_TXRX2_SEL1  = 1'b0;  
+  assign CH1_FE_TXRX2_SEL2  = 1'b1;  
+  assign CH1_FE_RX2_SEL1    = 1'b0;
+  assign CH1_FE_RX2_SEL2    = 1'b1;
 
   assign CH2_TX1_AMP_EN = 1'b1;
   assign CH2_TX2_AMP_EN = 1'b1;
-  assign CH2_FE_TXRX2_SEL1 = 1'b0;
-  assign CH2_FE_TXRX1_SEL1 = 1'b1;
-  assign CH2_FE_RX2_SEL1 = 1'b0;
-  assign CH2_FE_RX1_SEL1 = 1'b1;
+  assign CH2_FE_TXRX1_SEL1  = 1'b1;  
+  assign CH2_FE_TXRX1_SEL2  = 1'b0;  
+  assign CH2_FE_RX1_SEL1    = 1'b1;
+  assign CH2_FE_RX1_SEL2    = 1'b0;
+  assign CH2_FE_TXRX2_SEL1  = 1'b0;  
+  assign CH2_FE_TXRX2_SEL2  = 1'b1;  
+  assign CH2_FE_RX2_SEL1    = 1'b0;
+  assign CH2_FE_RX2_SEL2    = 1'b1;
+
+  
+
 
   ad_iobuf #(.DATA_WIDTH(42)) i_iobuf (
     .dio_t ({gpio_t[59:46], gpio_t[43:16]}),
@@ -243,10 +286,13 @@ module system_top (
 
   assign spi_ad9361_0 = spi0_csn[0];
   assign spi_ad9361_1 = spi0_csn[1];
+  assign CLK_PLL_LE = spi0_csn[2];
   assign spi_clk_0 =  spi0_clk;
   assign spi_mosi_0 = spi0_mosi;
   assign spi_clk_1 = spi0_clk;
   assign spi_mosi_1 = spi0_mosi;
+  assign CLK_PLL_LE = spi0_clk;
+  assign CLK_PLL_MOSI = spi0_mosi;
   assign spi0_miso = (spi0_csn[0]==1'b0) ? spi_miso_0 : (spi0_csn[1]==1'b0) ? spi_miso_1 : 1'b1;
   assign gpio_i[63:60] = gpio_o[63:60];
   assign gpio_i[45:44] = gpio_o[45:44];
@@ -274,7 +320,9 @@ module system_top (
     .fixed_io_ps_clk (fixed_io_ps_clk),
     .fixed_io_ps_porb (fixed_io_ps_porb),
     .fixed_io_ps_srstb (fixed_io_ps_srstb),
-    .ref_clk(),
+    .ref_clk(ref_clk),
+    .uart_gps_rxd(GPS_RXD),
+    .uart_gps_txd(GPS_TXD),
     .gpio_i (gpio_i),
     .gpio_o (gpio_o),
     .gpio_t (gpio_t),

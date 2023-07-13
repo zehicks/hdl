@@ -202,11 +202,11 @@ module system_top (
     assign FE_RX1_SEL1 = 1'b1;
   
 
-    assign pps_sel = gpio_o[31:30];
+    assign ext_ref_is_pps = gpio_o[30];
+    assign ref_sel = gpio_o[31];
     assign gpio_i[32] = ref_locked;
-    // assign ext_ref_is_pps = gpio_o[33];
-    // assign ref_sel = gpio_o[34];
-    assign ppsext = pps_sel==2'b11 ? PPS_IN : 1'b0;
+    
+    assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? PPS_IN : CLKIN_10MHz;
     assign ppsgps = GPS_PPS;
     assign PPS_LED = GPS_PPS;
     assign REF_10M_LOCK = is10meg & ref_locked;

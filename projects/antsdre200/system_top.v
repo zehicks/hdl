@@ -124,13 +124,14 @@ module system_top (
   wire    [85:0]  gp_out;
   wire   [85:0]  gp_in;
 
-  wire            int_40mhz   ;
-  wire            ref_pll_clk ;
-  wire            locked      ;
   wire            ref_sel;
   wire            ext_ref;
   wire            ext_ref_is_pps;
   wire            ext_ref_locked;
+  wire            ppsgps;
+  wire            ppsext;
+  wire            pll_locked;
+
   // assignments
   assign gp_out[85:0] = gp_out_s[85:0];
   assign gp_in_s[95:86] = gp_out_s[95:86];
@@ -157,43 +158,34 @@ module system_top (
     .dio_p (GPIOB )
     ); 
             
-
-    assign gpio_i[32] = ext_ref_locked;
-    assign ext_ref_is_pps = gpio_o[33];
-    assign ref_sel = gpio_o[34];
     assign tx_amp_en = 1'b1;
     assign eth_rst_n = 1'b1;
   
-    assign FE_TXRX2_SEL2 = 1'b0;
-    assign FE_TXRX2_SEL1 = 1'b1;
-    assign FE_TXRX1_SEL2 = 1'b1;
-    assign FE_TXRX1_SEL1 = 1'b0;
-    assign FE_RX2_SEL2 = 1'b0;
-    assign FE_RX2_SEL1 = 1'b1;
-    assign FE_RX1_SEL2 = 1'b1;
-    assign FE_RX1_SEL1 = 1'b0;
-  
-    gen_clks gen_clks(
-        .clk_out1(int_40mhz),       // output clk_out1
-        .clk_out2(),                // output clk_out2
-        .clk_out3(ref_pll_clk),     // output clk_out3
-        .locked(locked),            // output locked
-  
-        .clk_in1(CLK_40MHz_FPGA)
+
+
+    assign ext_ref_is_pps = gpio_o[33];
+    assign ref_sel = gpio_o[34];
+    assign gpio_i[32] = ext_ref_locked;
+    assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? PPS_IN : CLKIN_10MHz;
+
+    ppsloop #(.DEVICE("LTC2630")
+    )u_ppsloop(
+        .xoclk   ( CLK_40MHz_FPGA   ),
+        .ppsgps  ( ppsgps  ),
+        .ppsext  ( ppsext  ),
+        .refsel  ( 2'b00 ),
+        .lpps    (     ),
+        .is10meg (  ),
+        .ispps   (  ),
+        .reflck  ( ext_ref_locked ),
+        .plllck  ( pll_locked ),
+        .sclk    ( CLK_40M_DAC_SCLK    ),
+        .mosi    ( CLK_40M_DAC_DIN    ),
+        .sync_n  ( CLK_40M_DAC_nSYNC  ),
+        .dac_dflt  ( 16'hBfff )
     );
   
-    assign ext_ref = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : 1'b0;
-    b205_ref_pll ref_pll(
-        .reset(~locked),
-        .clk(ref_pll_clk),
-        .refclk(int_40mhz),
-        .ref_x(ext_ref),
-        .locked(ext_ref_locked),
-        .sclk(CLK_40M_DAC_SCLK),
-        .mosi(CLK_40M_DAC_DIN),
-        .sync_n(CLK_40M_DAC_nSYNC)
-    );
-    assign CLKIN_10MHz_REQ = ref_sel;
+    assign CLKIN_10MHz_REQ = 1'b1;
 
   // instantiations
 

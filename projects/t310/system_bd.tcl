@@ -6,6 +6,7 @@ source $ad_hdl_dir/projects/scripts/adi_pd.tcl
 
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:ddrx_rtl:1.0 ddr
 create_bd_intf_port -mode Master -vlnv xilinx.com:display_processing_system7:fixedio_rtl:1.0 fixed_io
+create_bd_intf_port -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 uart_gps
 
 create_bd_port -dir O -type clk ref_clk
 
@@ -81,7 +82,7 @@ ad_ip_parameter sys_ps7 CONFIG.PCW_EN_CLK2_PORT 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_EN_RST2_PORT 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA0_PERIPHERAL_FREQMHZ 100.0
 ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA1_PERIPHERAL_FREQMHZ 200.0
-ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA2_PERIPHERAL_FREQMHZ 200.0
+ad_ip_parameter sys_ps7 CONFIG.PCW_FPGA2_PERIPHERAL_FREQMHZ 40.0
 ad_ip_parameter sys_ps7 CONFIG.PCW_USE_FABRIC_INTERRUPT 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_IRQ_F2P_INTR 1
 ad_ip_parameter sys_ps7 CONFIG.PCW_GPIO_EMIO_GPIO_ENABLE 1
@@ -116,6 +117,7 @@ ad_connect  sys_200m_resetn sys_200m_rstgen/peripheral_aresetn
 ad_connect  sys_200m_clk sys_200m_rstgen/slowest_sync_clk
 ad_connect  sys_200m_rstgen/ext_reset_in sys_ps7/FCLK_RESET1_N
 ad_connect  ref_clk sys_ps7/FCLK_CLK2
+ad_connect  uart_gps sys_ps7/UART_0 
 # generic system clocks pointers
 
 set sys_cpu_clk      [get_bd_nets sys_cpu_clk]
