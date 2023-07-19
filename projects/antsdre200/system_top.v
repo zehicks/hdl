@@ -166,14 +166,14 @@ module system_top (
     assign ext_ref_is_pps = gpio_o[33];
     assign ref_sel = gpio_o[34];
     assign gpio_i[32] = ext_ref_locked;
-    assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? PPS_IN : CLKIN_10MHz;
+    assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz : PPS_IN  ;
 
     ppsloop #(.DEVICE("LTC2630")
     )u_ppsloop(
         .xoclk   ( CLK_40MHz_FPGA   ),
         .ppsgps  ( ppsgps  ),
         .ppsext  ( ppsext  ),
-        .refsel  ( 2'b00 ),
+        .refsel  ( 2'b11 ),
         .lpps    (     ),
         .is10meg (  ),
         .ispps   (  ),

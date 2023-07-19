@@ -149,7 +149,7 @@ module system_top (
   assign ext_ref_is_pps = gpio_o[8];
   assign ref_sel = gpio_o[9];
   assign gpio_i[10] = ext_ref_locked;
-  assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? PPS_IN : CLKIN_10MHz;
+  assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz :  PPS_IN ;
 
   ppsloop #(.DEVICE("LTC2630")
   )u_ppsloop(

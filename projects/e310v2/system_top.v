@@ -206,7 +206,7 @@ module system_top (
     assign ref_sel = gpio_o[31];
     assign gpio_i[32] = ref_locked;
     
-    assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? PPS_IN : CLKIN_10MHz;
+    assign ppsext = ext_ref_is_pps ? PPS_IN : ref_sel ? CLKIN_10MHz  : PPS_IN;
     assign ppsgps = GPS_PPS;
     assign PPS_LED = GPS_PPS;
     assign REF_10M_LOCK = is10meg & ref_locked;
