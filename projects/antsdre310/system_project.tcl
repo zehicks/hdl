@@ -8,7 +8,8 @@ adi_project antsdre310
 adi_project_files antsdre310 [list \
   "$ad_hdl_dir/library/common/ad_iobuf.v" \
   "system.xdc" \
-  "ppsloop.xdc" \
+  "ppsloop.v" \
+  "ltc2630_spi.v" \
   "system_top.v" ]
 
 adi_project_run antsdre310

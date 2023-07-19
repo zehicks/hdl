@@ -156,7 +156,7 @@ module system_top (
       .xoclk   ( CLK_40MHz_FPGA   ),
       .ppsgps  ( ppsgps  ),
       .ppsext  ( ppsext  ),
-      .refsel  ( 2'b00 ),
+      .refsel  ( 2'b11 ),
       .lpps    (     ),
       .is10meg (  ),
       .ispps   (  ),
