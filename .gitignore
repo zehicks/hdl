@@ -97,4 +97,4 @@ _vmake
 *.xsa
 *.pdi
 library/*/bd/bd.tcl
-
+*.lock
